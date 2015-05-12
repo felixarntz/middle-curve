@@ -178,6 +178,7 @@ public:
 	}
 
 	vector<FS_Point<T>> getResult(){
-		return m_result;
+		vector<FS_Point<T>> bla = m_result;
+		return bla;
 	}
 };
