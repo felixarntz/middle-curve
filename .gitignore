@@ -1,7 +1,8 @@
 # folders and files to be ignored by git
 
 Debug/*
-*.vcxproj.*
+*.vcxproj
+*.vcxproj.filters
 
 ############
 ## IDEs
