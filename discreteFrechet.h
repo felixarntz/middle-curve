@@ -23,6 +23,7 @@ protected:
 	vector<FS_Point<T>> m_result;
 	vector<FS_Point<T>> m_freespace;
 
+	
 	int make_real_i(int i){
 		return i;
 	}
