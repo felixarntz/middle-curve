@@ -66,7 +66,7 @@ class Algorithm extends \Studienprojekt\Base\Algorithm {
   }
 
   protected function find_path() {
-    return $this->find_cheapest_path( 0, $this->get_binary_choices() );
+    return $this->find_cheapest_path( 0, $this->get_binary_choices( 1, intval( pow( 2, $this->dimension ) ) ) );
   }
 
   protected function find_cheapest_path( $index, $choices ) {
@@ -111,14 +111,6 @@ class Algorithm extends \Studienprojekt\Base\Algorithm {
 
   protected function make_real_dimension() {
     return $this->dimension;
-  }
-
-  protected function get_binary_choices() {
-    $choices = array();
-    for ( $i = 1; $i < intval( pow( 2, $this->dimension ) ); $i++ ) {
-      $choices[] = array_map( 'intval', str_split( str_pad( decbin( $i ), $this->dimension, '0', STR_PAD_LEFT ), 1 ) );
-    }
-    return $choices;
   }
 
   protected function get_points_for_output( $coords ) {

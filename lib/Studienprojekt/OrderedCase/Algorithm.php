@@ -24,7 +24,7 @@ class Algorithm extends \Studienprojekt\Base\Algorithm {
           if ( $i == 0 ) {
             $boolvalues[] = true;
           } else {
-            $choices = $this->get_binary_choices();
+            $choices = $this->get_binary_choices( 0, intval( pow( 2, $this->dimension ) ) );
             foreach ( $choices as $choice ) {
               $calc_coords = $this->get_calc_coords( $choice );
               if ( $this->is_in_boundaries( $coords, $calc_coords[0], $calc_coords[1] ) ) {
@@ -71,14 +71,6 @@ class Algorithm extends \Studienprojekt\Base\Algorithm {
       $min_coords[] = 0;
     }
     return array( $min_coords, $max_coords, $add_coords );
-  }
-
-  protected function get_binary_choices() {
-    $choices = array();
-    for ( $i = 0; $i < intval( pow( 2, $this->dimension ) ); $i++ ) {
-      $choices[] = array_map( 'intval', str_split( str_pad( decbin( $i ), $this->dimension, '0', STR_PAD_LEFT ), 1 ) );
-    }
-    return $choices;
   }
 
   protected function make_real_i( $i ) {
