@@ -18,36 +18,52 @@ class Algorithm extends \Studienprojekt\Base\Algorithm {
       $coords = $this->index_to_coords( $i );
       $this->freespace[ $i ] = new \Studienprojekt\OrderedCase\BoolspacePoint( $coords );
       $boolvalues = array();
-      for ( $x = 0; $x < $this->boolsize; $x++ ) {
-        if ( $x == 0 ) {
-          // R contains neither Pi nor Qj
-          if ( $i == 0 ) {
-            $boolvalues[] = true;
-          } else {
-            $choices = $this->get_binary_choices( 0, intval( pow( 2, $this->dimension ) ) );
-            foreach ( $choices as $choice ) {
-              $calc_coords = $this->get_calc_coords( $choice );
-              if ( $this->is_in_boundaries( $coords, $calc_coords[0], $calc_coords[1] ) ) {
-                //TODO: if choice = 0, boolvalues false
-                $boolvalues[] = $this->freespace[ $this->coords_to_index( $this->add_coords( $coords, $calc_coords[2] ) ) ]->get_mainvalue();
-                break;
-              }
+      $counter = 0;
+
+      // Fall A (1 boolvalue)
+      if ( $i == 0 ) {
+        $boolvalues[] = true;
+      } else {
+        $choice = $this->make_binary( 0, $this->dimension * 2 );
+        $calc_coords = $this->get_calc_coords( $choice );
+        if ( $this->is_in_boundaries( $coords, $calc_coords[0], $calc_coords[1] ) ) {
+          $boolvalues[] = false;
+        } else {
+          $choices = $this->get_binary_choices( 1, intval( pow( 2, $this->dimension ) ), $this->dimension * 2 );
+          foreach ( $choices as $choice ) {
+            $calc_coords = $this->get_calc_coords( $choice );
+            if ( $this->is_in_boundaries( $coords, $calc_coords[0], $calc_coords[1] ) ) {
+              $boolvalues[] = $this->freespace[ $this->coords_to_index( $this->add_coords( $coords, $calc_coords[2] ) ) ]->get_mainvalue();
+              break;
             }
           }
-        } elseif ( $x == 1 ) {
-
-        } elseif ( $x == 2 ) {
-          
-        } elseif ( $x == 3 ) {
-          
-        } elseif ( $x == 4 ) {
-          
-        } elseif ( $x == 5 ) {
-          
-        } elseif ( $x == 6 ) {
-          
         }
       }
+
+      $counter++;
+
+      // Fall B/D (2^k - 2 boolvalues)
+      $choices = $this->get_binary_choices( 1, intval( pow( 2, $this->dimension ) - 1 ), $this->dimension );
+      for ( $choices as $choice ) {
+        //$boolvalues[] = false;
+        $counter++;
+      }
+
+      for ( $j = 0; $j < $this->dimension; $j++ ) {
+        // Fall C/E (k boolvalues)
+        $choice = $this->make_binary( 0, $this->dimension - 1 );
+        //$boolvalues[] = false;
+        $counter++;
+
+        // Fall F/G (k * (2^(k-1) - 1) boolvalues)
+        $choices = $this->get_binary_choices( 1, intval( pow( 2, $this->dimension - 1 ) ), $this->dimension - 1 );
+        foreach ( $choices as $choice ) {
+          //$boolvalues[] = false;
+          $counter++;
+        }
+      }
+
+      //$this->freespace[ $i ]->set_boolvalues( $boolvalues );
     }
   }
 

@@ -66,7 +66,7 @@ class Algorithm extends \Studienprojekt\Base\Algorithm {
   }
 
   protected function find_path() {
-    return $this->find_cheapest_path( 0, $this->get_binary_choices( 1, intval( pow( 2, $this->dimension ) ) ) );
+    return $this->find_cheapest_path( 0, $this->get_binary_choices( 1, intval( pow( 2, $this->dimension ) ), $this->dimension ) );
   }
 
   protected function find_cheapest_path( $index, $choices ) {

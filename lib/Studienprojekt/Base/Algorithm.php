@@ -89,12 +89,16 @@ abstract class Algorithm {
     return true;
   }
 
-  protected function get_binary_choices( $start, $end ) {
+  protected function get_binary_choices( $start, $end, $length ) {
     $choices = array();
     for ( $i = $start; $i < $end; $i++ ) {
-      $choices[] = array_map( 'intval', str_split( str_pad( decbin( $i ), $this->dimension, '0', STR_PAD_LEFT ), 1 ) );
+      $choices[] = $this->make_binary( $i, $length );
     }
     return $choices;
+  }
+
+  protected function make_binary( $value, $length ) {
+    return array_map( 'intval', str_split( str_pad( decbin( $value ), $length, '0', STR_PAD_LEFT ), 1 ) );
   }
 
   protected abstract function make_real_i( $i );
