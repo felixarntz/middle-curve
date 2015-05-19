@@ -62,6 +62,4 @@ public:
 	bool get_visited() {
 		return m_visited;
 	}
-
-	
 };

@@ -65,6 +65,31 @@ class base_algorithm{
 			return a % b;
 		}
 
+		bool is_in_boundaries(vector<int> coords, vector<int> minCoords, vector<int> maxCoords){
+			if (coords.size() != minCoords.size() || coords.size() != maxCoords.size()){
+				return false;
+			}
+			for (int i = 0; i < coords.size(); i++){
+				if (coords[i] < minCoords[i] || coords[i] > maxCoords[i]){
+					return false;
+				}
+			}
+			return true;
+		}
+
+		vector<int> add_coords(vector<int> coords1, vector<int> coords2) {
+			vector<int> sum;
+
+			if (coords1.size() != coords2.size()){
+				return coords1;
+			}
+
+			for (int i = 0; i < coords1.size(); i++) {
+				sum.push_back(coords1[i] + coords2[i]);
+			}
+			return sum;
+		}
+
 	public:
 		base_algorithm(vector<Trajectory<double, T>> trajectories){
 			m_trajectories = trajectories;

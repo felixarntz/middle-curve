@@ -107,7 +107,7 @@ int main (int argc, char** argv) {
 	//UnorderedCase<2> un(eingabe);
 	OrderedCase<2> un(eingabe);
 	un.run();
-	un.printResults();
+	//un.printResults();
 
 
 	return 0;

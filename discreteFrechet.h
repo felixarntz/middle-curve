@@ -125,14 +125,6 @@ public:
 		return sqrt(pow(pos1[0] - pos2[0], 2) + pow(pos1[1] - pos2[1], 2));
 	}
 
-	vector<int> add_coords(vector<int> coords1, vector<int> coords2) {
-		vector<int> sum;
-		for (int i = 0; i < m_dimension; i++) {
-			sum.push_back(coords1[i] + coords2[i]);
-		}
-		return sum;
-	}
-
 	vector<vector<int>> get_binary_choices(){
 		vector<vector<int>> choices;
 	
