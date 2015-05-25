@@ -24,12 +24,12 @@ class Algorithm extends \Studienprojekt\Base\Algorithm {
       if ( $i == 0 ) {
         $boolvalues[] = true;
       } else {
-        $choice = $this->make_binary( 0, $this->dimension * 2 );
+        $choice = $this->make_binary( 0, $this->dimension );
         $calc_coords = $this->get_calc_coords( $choice );
         if ( $this->is_in_boundaries( $coords, $calc_coords[0], $calc_coords[1] ) ) {
           $boolvalues[] = false;
         } else {
-          $choices = $this->get_binary_choices( 1, intval( pow( 2, $this->dimension ) ), $this->dimension * 2 );
+          $choices = $this->get_binary_choices( 1, intval( pow( 2, $this->dimension ) ), $this->dimension );
           foreach ( $choices as $choice ) {
             $calc_coords = $this->get_calc_coords( $choice );
             if ( $this->is_in_boundaries( $coords, $calc_coords[0], $calc_coords[1] ) ) {
