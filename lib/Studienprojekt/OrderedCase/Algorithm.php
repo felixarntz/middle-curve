@@ -21,7 +21,7 @@ class Algorithm extends \Studienprojekt\Base\Algorithm {
       $this->freespace[ $i ] = new \Studienprojekt\OrderedCase\BoolspacePoint( $coords );
       $boolvalues = array();
 
-      // Fall A (1 boolvalue)
+      // Fall A (1 boolvalue) --> Regel 1
       if ( $i == 0 ) {
         $boolvalues[] = true;
       } else {
@@ -42,7 +42,7 @@ class Algorithm extends \Studienprojekt\Base\Algorithm {
         }
       }
 
-      // Fall B/D (2^k - 2 boolvalues)
+      // Fall B/D (2^k - 2 boolvalues) --> Regel 2
       $choices = $this->get_binary_choices( 1, intval( pow( 2, $this->dimension ) - 1 ), $this->dimension );
       $rule_2_counter = 0;
       for ( $choices as $choice ) {
@@ -55,7 +55,7 @@ class Algorithm extends \Studienprojekt\Base\Algorithm {
         $rule_2_counter++;
       }
 
-      // Fall C/E (k boolvalues)
+      // Fall C/E (k boolvalues) --> Regel 3
       for ( $j = 0; $j < $this->dimension; $j++ ) {
         $index_to_check = $this->dimension - 1 - $j;
         if ( $coords[ $index_to_check ] == 0 || $this->has_coord_zero( $coords, 0, $this->dimension ) ) {
@@ -92,7 +92,7 @@ class Algorithm extends \Studienprojekt\Base\Algorithm {
         }
       }
 
-      // Fall F/G (k * (2^(k-1) - 1) boolvalues)
+      // Fall F/G (k * (2^(k-1) - 1) boolvalues) --> Regel 4
       for ( $j = 0; $j < $this->dimension; $j++ ) {
         $choices = $this->get_binary_choices( 1, intval( pow( 2, $this->dimension - 1 ) ), $this->dimension - 1 );
         foreach ( $choices as $choice ) {
