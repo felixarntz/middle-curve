@@ -28,6 +28,12 @@ class BoolspacePoint {
     return $this->boolvalues;
   }
 
+  public function get_boolvalue_at( $i ) {
+    if ( isset( $this->boolvalues[ $i ] ) ) {
+      return $this->boolvalues[ $i ];
+    }
+  }
+
   public function get_mainvalue() {
     return $this->mainvalue;
   }
