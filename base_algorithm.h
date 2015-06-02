@@ -9,22 +9,23 @@ template <size_t T>
 class base_algorithm{
 	protected:
 
+		//Attribute
 		vector<Trajectory<double, T>> m_trajectories;
 		int m_dimension = 0;
 		
 		int m_freespace_size = 0;
 		vector<int> m_shape_strides;
-
+		
+		//Abstrakte Funktionen
 		virtual int make_real_i(int i) = 0;
 		virtual int make_real_dimension() = 0;
 
-
+		//Funktionen
 		int coords_to_index(vector<int> coords) {
 			int real_dimension = make_real_dimension();
 			if (coords.size() != real_dimension) {
 				return -1;
 			}
-
 
 			int index = 0;
 			for (int i = real_dimension - 1; i >= 0; i--) {
@@ -63,6 +64,30 @@ class base_algorithm{
 				}
 			}
 			return a % b;
+		}
+
+		vector<vector<int>> get_binary_choices(int start, int end, int len){
+			vector<vector<int>> choices;
+
+			for (int i = start; i < end; i++){
+				vector<int> choice = make_Binary(i, len);
+				choices.push_back(choice);
+			}
+
+			return choices;
+		}
+
+		vector<int> make_Binary(int value, int len){
+
+			string binary = bitset<32>(value).to_string();
+			binary = binary.substr(binary.length() - len, len);
+
+			vector<int> choice;
+			for (int i = 0; i < binary.length(); i++){
+				choice.push_back(stoi(binary.substr(i, 1)));
+			}
+
+			return choice;
 		}
 
 		bool is_in_boundaries(vector<int> coords, vector<int> minCoords, vector<int> maxCoords){

@@ -61,7 +61,7 @@ public:
 
 	void run(){	
 		base_algorithm::run();
-		m_choices = get_binary_choices();
+		m_choices = get_binary_choices(1, (int)pow(2, m_dimension), m_dimension);
 		fill_free_space();
 		m_result = find_path();
 	}
@@ -123,23 +123,6 @@ public:
 
 	double calc_distance(double pos1[], double pos2[]) {
 		return sqrt(pow(pos1[0] - pos2[0], 2) + pow(pos1[1] - pos2[1], 2));
-	}
-
-	vector<vector<int>> get_binary_choices(){
-		vector<vector<int>> choices;
-	
-		for (int i = 1; i < (int)pow(2, m_dimension); i++){
-			string binary = bitset<32>(i).to_string();  //B
-			binary = binary.substr(binary.length() - m_dimension, m_dimension);
-
-			vector<int> choice;
-			for (int i = 0; i < binary.length(); i++){
-				choice.push_back(stoi(binary.substr(i, 1)));
-			}
-			
-			choices.push_back(choice);
-		}
-		return choices;
 	}
 
 	//Ausgabe

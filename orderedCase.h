@@ -12,58 +12,111 @@ class OrderedCase : base_algorithm<T> {
 
 protected:
 	vector<BS_Point<T>> m_boolspace;
-	int m_bool_size = 0;
 
 	void fill_bool_space(){
 		
 		for (int i = 0; i < m_freespace_size; i++){
 			vector<int> coords = index_to_coords(i);
 			m_boolspace.push_back(BS_Point<T>(coords));
-			
-			vector<bool> temp;
-			for (int x = 0; x < m_bool_size; x++){
+			vector<bool> bool_values;
 
-				if (x == 0){
-					//Rcontains neither P_i nor Q_j
-					if (i == 0){
-						temp.push_back(true);
+			//Regel 1 (1 Boolvalue)
+			if (i == 0){
+				bool_values.push_back(true);
+			}
+			else{
+				vector<int> choice = make_Binary(0, m_dimension);
+				vector<int> boundary_Coords[2] = get_Boundary_Coords(choice, 1);
+				if (is_in_boundaries(coords, boundary_Coords[0], boundary_Coords[1])){
+					bool_values.push_back(false);
+				}
+				else{
+					vector<vector<int>> choices = get_binary_choices(1, (int)pow(2, m_dimension), m_dimension);
+					for (choice : choices){
+						boundary_Coords = get_Boundary_Coords(choice, 1);
+						if (is_in_boundaries(coords, boundary_Coords[0], boundary_Coords[1])){
+							vector<int> temp_add_coords = get_add_coords(choice, 1);
+							bool_values.push_back(m_boolspace[coords_to_index(add_coords(coords, temp_add_coords))].getMainvalue());
+						}
 					}
-					else if (is_in_boundaries(coords, { 0, 0, 0, 0 }, { 0, 0, (int)(m_trajectories[0].size() - 1), (int)(m_trajectories[1].size() - 1)})){
-						temp.push_back(false);
-					}
-					else if (is_in_boundaries(coords, { 0, 0, 0, 0 }, { (int)(m_trajectories[0].size() - 1), 0, (int)(m_trajectories[0].size() - 1), (int)(m_trajectories[1].size() - 1) })){
-						temp.push_back(m_boolspace[coords_to_index(addadd_coords(coords, {-1, 0, 0, 0}))].getMainvalue());
-					}
-					else if (is_in_boundaries(coords, { 0, 0, 0, 0 }, { 0, (int)(m_trajectories[1].size() - 1), (int)(m_trajectories[0].size() - 1), (int)(m_trajectories[1].size() - 1) })){
-						temp.push_back(m_boolspace[coords_to_index(addadd_coords(coords, { 0, -1, 0, 0 }))].getMainvalue());
-					}
-					else {
-						temp.push_back(m_boolspace[coords_to_index(addadd_coords(coords, { -1, -1, 0, 0 }))].getMainvalue());
-					}
-					
-				}
-				else if (x == 1){
-
-				}
-				else if (x == 2){
-
-				}
-				else if (x == 3){
-
-				}
-				else if (x == 4){
-
-				}
-				else if (x == 5){
-
-				}
-				else if (x == 6){
-
 				}
 			}
+
+			//Regel 2 (2^k -2 Boolvalues)
+
+			//Regel 3 (k Boolvalues)
+
+			//Regel 4 (k*(2^(k-1)-1) Boolvalues)
+
 		}
 	}
 
+	array<vector<int>, 2> get_Boundary_Coords(vector<int> binaryChoice, int rule){
+		vector<int> output[2] = {
+			vector<int>,
+			vector<int>
+		};
+		//fill(output.begin(), output.end(), vector<int>(2*m_dimension));
+
+		switch (rule){
+		case 1: 
+		case 2: 
+			for (int i = 0; i < m_dimension; i++){
+				if (binaryChoice[i] == 1){
+					output[1].push_back(m_trajectories[i].size() - 1);
+				}
+				else{
+					output[1].push_back(0);
+				}
+				output[0].push_back(0);
+			} 
+			
+			for (int i = 0; i < m_dimension; i++){
+				output[1].push_back(m_trajectories[i].size() - 1);	
+				output[0].push_back(0);
+			} break;
+
+		case 3: break; //B
+		case 4: break; //B
+
+		default: 
+			for (int i = 0; i < (2*m_dimension); i++){
+				output[1].push_back(m_trajectories[i].size() - 1);
+				output[0].push_back(0);
+			} break;
+		}
+
+		return output;
+	}
+
+	vector<int> get_add_coords(vector<int> binaryChoice, int rule){
+		vector<int> output;
+
+		switch (){
+		case 1: 
+		case 2: 
+			for (int i = 0; i < m_dimension; i++){
+				if (binaryChoice[i] == 1){
+					output.push_back(-1);
+				}
+				else{
+					output.push_back(0);
+				}
+			} 
+
+			for (int i = 0; i < m_dimension; i++){
+				output.push_back(0);
+			} break;
+
+		case 3: break; //B
+		case 4: break; //B
+
+		default:
+			for (int i = 0; i < (2*m_dimension); i++){
+				output.push_back(0);
+			} break;
+		}
+	}
 
 	int make_real_i(int i){
 		if (i >= m_dimension){
