@@ -105,6 +105,19 @@ abstract class Algorithm {
     return array_map( 'intval', str_split( str_pad( decbin( $value ), $length, '0', STR_PAD_LEFT ), 1 ) );
   }
 
+  protected function make_decimal( $binary ) {
+    $result = 0;
+    $counter = 0;
+    for ( $i = count( $binary ) - 1; $i >= 0; $i-- ) {
+      if ( $binary[ $i ] == 1 ) {
+        $result += pow( 2, $counter );
+      }
+      $counter++;
+    }
+
+    return $result;
+  }
+
   protected abstract function make_real_i( $i );
 
   protected abstract function make_real_dimension();

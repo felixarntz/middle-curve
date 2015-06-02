@@ -3,13 +3,45 @@
 namespace Studienprojekt\OrderedCase;
 
 class Algorithm extends \Studienprojekt\Base\Algorithm {
+  protected $epsilon_temp = 5; // temp var for epsilon
+
   public function run() {
     parent::run();
 
     $this->results = array();
   }
 
-  protected function rule_1( $coords, $rule_counter = 0 ) {
+  protected function fill_free_space() {
+    for ( $i = 0; $i < $this->freespace_size; $i++ ) {
+      $coords = $this->index_to_coords( $i );
+      $this->freespace[ $i ] = new \Studienprojekt\OrderedCase\BoolspacePoint( $coords );
+      $boolvalues = array();
+
+      // Fall A (1 boolvalue) --> Regel 1
+      $boolvalues[] = $this->rule_1( $coords );
+
+      // Fall B/D (2^k - 2 boolvalues) --> Regel 2
+      for ( $j = 1; $j <= intval( pow( 2, $this->dimension ) - 2 ); $j++ ) {
+        $boolvalues[] = $this->rule_2( $coords, $j );
+      }
+
+      // Fall C/E (k boolvalues) --> Regel 3
+      for ( $j = 1; $j <= $this->dimension; $j++ ) {
+        $boolvalues[] = $this->rule_3( $coords, $j );
+      }
+
+      // Fall F/G (k * (2^(k-1) - 1) boolvalues) --> Regel 4
+      for ( $j = 1; $j <= $this->dimension; $j++ ) {
+        for ( $k = 1; $k <= intval( pow( 2, $this->dimension - 1 ) - 1 ); $k++ ) {
+          $boolvalues[] = $this->rule_4( $coords, $j, $k );
+        }
+      }
+
+      $this->freespace[ $i ]->set_boolvalues( $boolvalues );
+    }
+  }
+
+  protected function rule_1( $coords ) {
     if ( $this->coords_to_index( $coords ) == 0 ) {
       return true;
     }
@@ -32,6 +64,10 @@ class Algorithm extends \Studienprojekt\Base\Algorithm {
   }
 
   protected function rule_2( $coords, $rule_counter = 0 ) {
+    if ( $rule_counter == 0 ) { // must start at 1
+      return false;
+    }
+
     $choice = $this->make_binary( $rule_counter, $this->dimension );
     $others = false;
     foreach ( $choice as $key => $value ) {
@@ -58,31 +94,28 @@ class Algorithm extends \Studienprojekt\Base\Algorithm {
   }
 
   protected function rule_3( $coords, $rule_counter = 0 ) {
-    $index_to_check = $this->dimension - 1 - $rule_counter;
-    if ( $coords[ $index_to_check ] == 0 || $this->has_coord_zero( $coords, 0, $this->dimension ) ) {
+    if ( $rule_counter == 0 ) { // must start at 1
       return false;
     }
 
-    $current_point = $this->trajectories[ $index_to_check ]->get_point( $coords[ $index_to_check ] - 1 );
-    $boolvalue = true;
-    for ( $x = 0; $x < $this->dimension; $rule_counter++ ) {
+    if ( $coords[ $rule_counter - 1 ] == 0 || $this->has_coord_zero( $coords, 0, $this->dimension ) ) {
+      return false;
+    }
+
+    $current_point = $this->trajectories[ $rule_counter - 1 ]->get_point( $coords[ $rule_counter - 1 ] - 1 );
+    for ( $x = 0; $x < $this->dimension; $x++ ) {
       if ( $coords[ $x + $this->dimension ] == 0 ) {
-        $boolvalue = false; // return true or false?
-        break;
+        return false;
       }
       $point = $this->trajectories[ $x ]->get_point( $coords[ $x + $this->dimension ] - 1 );
       if ( $this->calc_distance( $point->get_pos(), $current_point->get_pos() ) > $epsilon ) {
-        $boolvalue = false;
-        break;
+        return false;
       }
-    }
-    if ( ! $boolvalue ) {
-      return $boolvalue;
     }
 
     $add_coords = $this->get_add_coords( $this->make_binary( 0, $this->dimension ), 3 );
-    if ( $this->freespace[ $this->coords_to_index( $this->add_coords( $coords, $add_coords ) ) ]->get_boolvalue_at( $this->get_rule_index( 0, 1 ) ) ) {
-      return $boolvalue;
+    if ( $this->freespace[ $this->coords_to_index( $this->add_coords( $coords, $add_coords ) ) ]->get_boolvalue_at( $this->get_rule_index( 1, 1 ) ) ) {
+      return true;
     }
 
     $boolvalue = false;
@@ -98,80 +131,77 @@ class Algorithm extends \Studienprojekt\Base\Algorithm {
     return $boolvalue;
   }
 
-  protected function fill_free_space() {
-    $epsilon = 5.0; //TODO: how does it work without Epsilon?
+  protected function rule_4( $coords, $rule_counter = 0, $inner_rule_counter = 0 ) {
+    if ( $rule_counter == 0 ) { // must start at 1
+      return false;
+    }
 
-    for ( $i = 0; $i < $this->freespace_size; $i++ ) {
-      $coords = $this->index_to_coords( $i );
-      $this->freespace[ $i ] = new \Studienprojekt\OrderedCase\BoolspacePoint( $coords );
-      $boolvalues = array();
+    if ( $this->has_coord_zero( $coords ) ) { //TODO: wirklich jede Koordinate betrachten?
+      return false;
+    }
 
-      // Fall A (1 boolvalue) --> Regel 1
-      $boolvalues[] = $this->rule_1( $coords );
-
-      // Fall B/D (2^k - 2 boolvalues) --> Regel 2
-      for ( $j = 1; $j <= intval( pow( 2, $this->dimension ) - 2 ); $j++ ) {
-        $boolvalues[] = $this->rule_2( $coords, $j );
+    $current_point = $this->trajectories[ $rule_counter - 1 ]->get_point( $coords[ $rule_counter - 1 ] - 1 );
+    for ( $x = 0; $x < $this->dimension; $x++ ) {
+      if ( $coords[ $x + $this->dimension ] == 0 ) {
+        return false;
       }
-
-      // Fall C/E (k boolvalues) --> Regel 3
-      for ( $j = 0; $j < $this->dimension; $j++ ) {
-        $boolvalues[] = $this->rule_3( $coords, $j );
+      $point = $this->trajectories[ $x ]->get_point( $coords[ $x + $this->dimension ] - 1 );
+      if ( $this->calc_distance( $point->get_pos(), $current_point->get_pos() ) > $epsilon ) {
+        return false;
       }
+    }
 
-      // Fall F/G (k * (2^(k-1) - 1) boolvalues) --> Regel 4
-      for ( $j = 0; $j < $this->dimension; $j++ ) {
-        $choices = $this->get_binary_choices( 1, intval( pow( 2, $this->dimension - 1 ) ), $this->dimension - 1 );
-        foreach ( $choices as $choice ) {
-          if ( $this->has_coord_zero( $coords ) ) {
-            $boolvalues[] = false;
-          } else {
-            $index_to_check = $this->dimension - 1 - $j;
-            $current_point = $this->trajectories[ $index_to_check ]->get_point( $coords[ $index_to_check ] - 1 );
-            $boolvalue = true;
-            for ( $x = 0; $x < $this->dimension; $j++ ) {
-              if ( $coords[ $x + $this->dimension ] == 0 ) {
-                $boolvalue = false; // return true or false?
-                break;
-              }
-              $point = $this->trajectories[ $x ]->get_point( $coords[ $x + $this->dimension ] - 1 );
-              if ( $this->calc_distance( $point->get_pos(), $current_point->get_pos() ) > $epsilon ) {
-                $boolvalue = false;
-                break;
-              }
-            }
-            if ( ! $boolvalue ) {
-              $boolvalues[] = $boolvalue;
-            } else {
-              //TODO: how does this rule work?
-              //$boolvalues[] = false;
-            }
-          }
+    $choice = $this->make_binary( $inner_rule_counter, $this->dimension - 1 );
+
+    $binary_index = array();
+    $inserted = false;
+    for ( $i = 0; $i < $this->dimension; $i++ ) {
+      if ( $i == $rule_counter - 1 ) {
+        $binary_index[] = 0;
+        $inserted = true;
+      } else {
+        if ( $inserted ) {
+          $binary_index[] = $choice[ $i - 1 ];
+        } else {
+          $binary_index[] = $choice[ $i ];
         }
       }
-
-      //$this->freespace[ $i ]->set_boolvalues( $boolvalues );
     }
+
+    $add_coords = $this->get_add_coords( $this->make_binary( 0, $this->dimension ), 4 );
+
+    $rule_2_index = $this->make_decimal( $binary_index );
+    if ( $this->freespace[ $this->coords_to_index( $this->add_coords( $coords, $add_coords ) ) ]->get_boolvalue_at( $this->get_rule_index( $rule_2_index, 2 ) ) ) {
+      return true;
+    }
+
+    for ( $j = 0; $j < $this->dimension - 1; $j++ ) {
+      $binary_short_index = $binary_index;
+      if ( $j >= $rule_counter - 1 ) {
+        unset( $binary_short_index[ $j + 1 ] );
+      } else {
+        unset( $binary_short_index[ $j ] );
+      }
+      $binary_short_index = array_values( $binary_short_index );
+
+      $rule_3_or_4_index = $this->make_decimal( $binary_short_index );
+      if ( $rule_3_or_4_index == 0 ) {
+        if ( $this->freespace[ $this->coords_to_index( $this->add_coords( $coords, $add_coords ) ) ]->get_boolvalue_at( $this->get_rule_index( $rule_counter, 3 ) ) ) {
+          return true;
+        }
+      } else {
+        if ( $this->freespace[ $this->coords_to_index( $this->add_coords( $coords, $add_coords ) ) ]->get_boolvalue_at( $this->get_rule_index( $rule_counter, 4, $rule_3_or_4_index ) ) ) {
+          return true;
+        }
+      }
+    }
+
+    //TODO: Zugriff auf gleiche Regel
+
+    return false; // this never happens
   }
 
-  protected function get_rule_indices( $rule_index, $rule = 0 ) {
-    if ( $rule < 1 || $rule > 4 ) {
-      return array();
-    }
-
-    if ( $rule == 1 ) {
-      return array( 0 );
-    }
-
-    $index = 1;
-
-    if ( $rule > 2 ) {
-
-    }
-  }
-
-  //TODO: figure out how to make get_rule_index() work
-  protected function get_rule_index( $rule_counter, $rule = 0 ) {
+  protected function get_rule_index( $rule_counter, $rule = 0, $inner_rule_counter = 0 ) {
     if ( $rule < 1 || $rule > 4 ) {
       return -1;
     }
@@ -192,7 +222,8 @@ class Algorithm extends \Studienprojekt\Base\Algorithm {
       $index += pow( 2, $this->dimension ) - 2;
     }
     if ( $rule > 3 ) {
-      $index += $this->dimension;
+      $index += $this->dimension + ( $rule_counter - 1 ) * ( pow( 2, $this->dimension - 1 ) - 1 );
+      return $index + $inner_rule_counter;
     }
 
     return $index + $rule_counter;
@@ -214,7 +245,6 @@ class Algorithm extends \Studienprojekt\Base\Algorithm {
     $add_coords = array();
     switch ( $rule ) {
       case 4:
-        break;
       case 3:
         for ( $i = 0; $i < $this->dimension; $i++ ) {
           $add_coords[] = 0;
