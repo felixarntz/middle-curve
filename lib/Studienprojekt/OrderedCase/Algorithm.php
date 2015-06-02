@@ -3,12 +3,8 @@
 namespace Studienprojekt\OrderedCase;
 
 class Algorithm extends \Studienprojekt\Base\Algorithm {
-  protected $boolsize = 0;
-
   public function run() {
     parent::run();
-    
-    $this->boolsize = pow( 2, $this->dimension - 1 ) * ( $this->dimension + 2 ) - 1;
 
     $this->results = array();
   }
