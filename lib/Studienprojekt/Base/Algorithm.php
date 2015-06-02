@@ -18,13 +18,15 @@ abstract class Algorithm {
 
   public function run() {
     $real_dimension = $this->make_real_dimension();
+    $add_value = $this->make_add_value();
 
     $this->shape_strides[0] = 1;
-    $this->freespace_size = $this->trajectories[0]->get_length();
+    $this->freespace_size = $this->trajectories[0]->get_length() + $add_value;
+
     for ( $i = 1; $i < $real_dimension; $i++ ) {
       $real_i = $this->make_real_i( $i );
-      $this->shape_strides[ $i ] = $this->shape_strides[ $i - 1 ] * $this->trajectories[ ( $i - 1 ) % $this->dimension ]->get_length();
-      $this->freespace_size *= $this->trajectories[ $real_i ]->get_length();
+      $this->shape_strides[ $i ] = $this->shape_strides[ $i - 1 ] * $this->trajectories[ ( $i - 1 ) % ( $this->dimension ]->get_length() + $add_value );
+      $this->freespace_size *= $this->trajectories[ $real_i ]->get_length() + $add_value;
     }
   }
 
@@ -33,11 +35,13 @@ abstract class Algorithm {
     if ( count( $coords ) !== $real_dimension ) {
       return -1;
     }
+    
+    $add_value = $this->make_add_value();
 
     $index = 0;
     for ( $i = $real_dimension - 1; $i >= 0; $i-- ) {
       $real_i = $this->make_real_i( $i );
-      if ( $coords[ $i ] >= $this->trajectories[ $real_i ]->get_length() ) {
+      if ( $coords[ $i ] >= $this->trajectories[ $real_i ]->get_length() + $add_value ) {
         return -1;
       }
       $index += $coords[ $i ] * $this->shape_strides[ $i ];
@@ -104,6 +108,8 @@ abstract class Algorithm {
   protected abstract function make_real_i( $i );
 
   protected abstract function make_real_dimension();
+
+  protected abstract function make_add_value();
 
   public function get_results() {
     return $this->results;

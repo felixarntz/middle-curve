@@ -113,6 +113,10 @@ class Algorithm extends \Studienprojekt\Base\Algorithm {
     return $this->dimension;
   }
 
+  protected function make_add_value() {
+    return 0;
+  }
+
   protected function get_points_for_output( $coords ) {
     $points = array();
     for ( $i = 0; $i < $this->dimension; $i++ ) {

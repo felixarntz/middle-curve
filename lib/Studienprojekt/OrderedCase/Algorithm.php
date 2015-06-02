@@ -57,10 +57,14 @@ class Algorithm extends \Studienprojekt\Base\Algorithm {
         if ( $coords[ $index_to_check ] == 0 || $this->has_coord_zero( $coords, 0, $this->dimension ) ) {
           $boolvalues[] = false;
         } else {
-          $current_point = $this->trajectories[ $index_to_check ]->get_point( $coords[ $index_to_check ] );
+          $current_point = $this->trajectories[ $index_to_check ]->get_point( $coords[ $index_to_check ] - 1 );
           $boolvalue = true;
           for ( $x = 0; $x < $this->dimension; $j++ ) {
-            $point = $this->trajectories[ $x ]->get_point( $coords[ $x + $this->dimension ] );
+            if ( $coords[ $x + $this->dimension ] == 0 ) {
+              $boolvalue = false; // return true or false?
+              break;
+            }
+            $point = $this->trajectories[ $x ]->get_point( $coords[ $x + $this->dimension ] - 1 );
             if ( $this->calc_distance( $point->get_pos(), $current_point->get_pos() ) > $epsilon ) {
               $boolvalue = false;
               break;
@@ -96,10 +100,14 @@ class Algorithm extends \Studienprojekt\Base\Algorithm {
             $boolvalues[] = false;
           } else {
             $index_to_check = $this->dimension - 1 - $j;
-            $current_point = $this->trajectories[ $index_to_check ]->get_point( $coords[ $index_to_check ] );
+            $current_point = $this->trajectories[ $index_to_check ]->get_point( $coords[ $index_to_check ] - 1 );
             $boolvalue = true;
             for ( $x = 0; $x < $this->dimension; $j++ ) {
-              $point = $this->trajectories[ $x ]->get_point( $coords[ $x + $this->dimension ] );
+              if ( $coords[ $x + $this->dimension ] == 0 ) {
+                $boolvalue = false; // return true or false?
+                break;
+              }
+              $point = $this->trajectories[ $x ]->get_point( $coords[ $x + $this->dimension ] - 1 );
               if ( $this->calc_distance( $point->get_pos(), $current_point->get_pos() ) > $epsilon ) {
                 $boolvalue = false;
                 break;
@@ -204,24 +212,24 @@ class Algorithm extends \Studienprojekt\Base\Algorithm {
       case 1:
         for ( $i = 0; $i < $this->dimension; $i++ ) {
           if ( $binary_choice[ $i ] == 1 ) {
-            $max_coords[] = count( $this->trajectories[ $i ] ) - 1;
+            $max_coords[] = count( $this->trajectories[ $i ] );
           } else {
             $max_coords[] = 0;
           }
           $min_coords[] = 0;
         }
         for ( $i = 0; $i < $this->dimension; $i++ ) {
-          $max_coords[] = count( $this->trajectories[ $i ] ) - 1;
+          $max_coords[] = count( $this->trajectories[ $i ] );
           $min_coords[] = 0;
         }
         break;
       default:
         for ( $i = 0; $i < $this->dimension; $i++ ) {
-          $max_coords[] = count( $this->trajectories[ $i ] ) - 1;
+          $max_coords[] = count( $this->trajectories[ $i ] );
           $min_coords[] = 0;
         }
         for ( $i = 0; $i < $this->dimension; $i++ ) {
-          $max_coords[] = count( $this->trajectories[ $i ] ) - 1;
+          $max_coords[] = count( $this->trajectories[ $i ] );
           $min_coords[] = 0;
         }
     }
@@ -241,5 +249,9 @@ class Algorithm extends \Studienprojekt\Base\Algorithm {
 
   protected function make_real_dimension() {
     return $this->dimension * 2;
+  }
+
+  protected function make_add_value() {
+    return 1;
   }
 }
