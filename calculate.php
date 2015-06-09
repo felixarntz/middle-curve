@@ -10,6 +10,8 @@ $response = array(
 
 ini_set( 'log_errors', '1' );
 ini_set( 'error_log', dirname( __FILE__ ) . '/errors.log' );
+ini_set( 'memory_limit', '1024M' );
+set_time_limit( 0 );
 
 if ( isset( $_POST ) && isset( $_POST['trajectories'] ) ) {
   $trajectories = $_POST['trajectories'];

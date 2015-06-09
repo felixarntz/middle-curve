@@ -88,10 +88,10 @@ class Algorithm extends \Studienprojekt\Base\Algorithm {
           $next_coords = $this->add_coords( $this->index_to_coords( $index ), $choice );
           $next_index = $this->coords_to_index( $next_coords );
           if ( $next_index > -1 ) {
-            $current_index = $this->find_cheapest_path( $next_index, $choices );
-            if ( $this->freespace[ $current_index ]->get_cost() < $cheapest ) {
-              $rest_index = $current_index;
-              $cheapest = $this->freespace[ $current_index ]->get_cost();
+            $this->find_cheapest_path( $next_index, $choices );
+            if ( $this->freespace[ $next_index ]->get_cost() < $cheapest ) {
+              $rest_index = $next_index;
+              $cheapest = $this->freespace[ $next_index ]->get_cost();
             }
           }
         }

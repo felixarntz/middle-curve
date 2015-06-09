@@ -8,7 +8,50 @@ class Algorithm extends \Studienprojekt\Base\Algorithm {
   public function run() {
     parent::run();
 
-    $this->results = array();
+    $this->fill_free_space();
+
+    $this->results = array(
+      'boolspace'     => array(),
+    );
+
+    foreach ( $this->freespace as $key => $boolspace_point ) {
+      $this->results['boolspace'][ $key ] = array(
+        'coords'          => $boolspace_point->get_indices(),
+        'points'          => $this->get_points_for_output( $boolspace_point->get_indices() ),
+        'cover_points'    => $this->get_points_for_output( $boolspace_point->get_indices(), 'cover' ),
+        'boolvalues'      => $boolspace_point->get_boolvalues(),
+      );
+    }
+  }
+
+  protected function get_points_for_output( $coords, $mode = 'default' ) {
+    $points = array();
+    $start = 0;
+    $end = $this->dimension;
+    $subtract = 0;
+    if ( $mode == 'cover' ) {
+      $start += $this->dimension;
+      $end += $this->dimension;
+      $subtract += $this->dimension;
+    }
+    for ( $i = $start; $i < $end; $i++ ) {
+      if ( $coords[ $i ] > 0 ) {
+        $points[] = $this->get_point_for_output( $this->trajectories[ $i - $subtract ]->get_point( $coords[ $i ] - 1 ) );
+      }
+    }
+    return $points;
+  }
+
+  protected function get_point_for_output( $point ) {
+    return array(
+      'index'           => $point->get_index(),
+      'trajectory_name' => $this->trajectories[ $point->get_trajectory_index() ]->get_name(),
+      'pos'             => array(
+        'x'               => $point->get_pos_x(),
+        'y'               => $point->get_pos_y(),
+      ),
+      'time'            => $point->get_time(),
+    );
   }
 
   protected function fill_free_space() {
@@ -104,11 +147,8 @@ class Algorithm extends \Studienprojekt\Base\Algorithm {
 
     $current_point = $this->trajectories[ $rule_counter - 1 ]->get_point( $coords[ $rule_counter - 1 ] - 1 );
     for ( $x = 0; $x < $this->dimension; $x++ ) {
-      if ( $coords[ $x + $this->dimension ] == 0 ) {
-        return false;
-      }
       $point = $this->trajectories[ $x ]->get_point( $coords[ $x + $this->dimension ] - 1 );
-      if ( $this->calc_distance( $point->get_pos(), $current_point->get_pos() ) > $epsilon ) {
+      if ( $this->calc_distance( $point->get_pos(), $current_point->get_pos() ) > $this->epsilon_temp ) {
         return false;
       }
     }
@@ -118,17 +158,15 @@ class Algorithm extends \Studienprojekt\Base\Algorithm {
       return true;
     }
 
-    $boolvalue = false;
     $choices = $this->get_binary_choices( 0, intval( pow( 2, $this->dimension ) - 1 ), $this->dimension );
     foreach ( $choices as $choice ) {
       $add_coords = $this->get_add_coords( $choice, 3 );
       if ( $this->freespace[ $this->coords_to_index( $this->add_coords( $coords, $add_coords ) ) ]->get_boolvalue_at( $this->get_rule_index( $rule_counter, 3 ) ) ) {
-        $boolvalue = true;
-        break;
+        return true;
       }
     }
 
-    return $boolvalue;
+    return false;
   }
 
   protected function rule_4( $coords, $rule_counter = 0, $inner_rule_counter = 0 ) {
@@ -146,7 +184,7 @@ class Algorithm extends \Studienprojekt\Base\Algorithm {
         return false;
       }
       $point = $this->trajectories[ $x ]->get_point( $coords[ $x + $this->dimension ] - 1 );
-      if ( $this->calc_distance( $point->get_pos(), $current_point->get_pos() ) > $epsilon ) {
+      if ( $this->calc_distance( $point->get_pos(), $current_point->get_pos() ) > $this->epsilon_temp ) {
         return false;
       }
     }
@@ -290,24 +328,24 @@ class Algorithm extends \Studienprojekt\Base\Algorithm {
       case 1:
         for ( $i = 0; $i < $this->dimension; $i++ ) {
           if ( $binary_choice[ $i ] == 1 ) {
-            $max_coords[] = count( $this->trajectories[ $i ] );
+            $max_coords[] = $this->trajectories[ $i ]->get_length();
           } else {
             $max_coords[] = 0;
           }
           $min_coords[] = 0;
         }
         for ( $i = 0; $i < $this->dimension; $i++ ) {
-          $max_coords[] = count( $this->trajectories[ $i ] );
+          $max_coords[] = $this->trajectories[ $i ]->get_length();
           $min_coords[] = 0;
         }
         break;
       default:
         for ( $i = 0; $i < $this->dimension; $i++ ) {
-          $max_coords[] = count( $this->trajectories[ $i ] );
+          $max_coords[] = $this->trajectories[ $i ]->get_length();
           $min_coords[] = 0;
         }
         for ( $i = 0; $i < $this->dimension; $i++ ) {
-          $max_coords[] = count( $this->trajectories[ $i ] );
+          $max_coords[] = $this->trajectories[ $i ]->get_length();
           $min_coords[] = 0;
         }
     }

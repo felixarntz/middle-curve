@@ -299,7 +299,33 @@ jQuery( document ).ready(function($) {
                 output += '<p class="lead">Calculations not yet implemented.</p>';
                 break;
               case 'ordered':
-                output += '<p class="lead">Calculations not yet implemented.</p>';
+                var cover_points_output = [];
+                var boolvalues_output = [];
+                output += '<h3>Boolspace</h3>';
+                output += '<table class="table table-bordered table-hover table-responsive">';
+                output += '<thead><tr><th>#</th><th>Boolspace Point</th><th>Boolvalues</th><th>Trajectory Points</th><th>Cover Points</th></tr></thead>';
+                output += '<tbody>';
+                for ( var i in data.boolspace ) {
+                  points_output = [];
+                  for ( var p in data.boolspace[ i ].points ) {
+                    points_output.push( data.boolspace[ i ].points[ p ].trajectory_name + '<sub>' + ( data.boolspace[ i ].points[ p ].index + 1 ) + '</sub> (' + data.boolspace[ i ].points[ p ].pos.x + '|' + data.boolspace[ i ].points[ p ].pos.y + ')' );
+                  }
+                  cover_points_output = [];
+                  for ( var p in data.boolspace[ i ].cover_points ) {
+                    cover_points_output.push( data.boolspace[ i ].cover_points[ p ].trajectory_name + '<sub>' + ( data.boolspace[ i ].cover_points[ p ].index + 1 ) + '</sub> (' + data.boolspace[ i ].cover_points[ p ].pos.x + '|' + data.boolspace[ i ].cover_points[ p ].pos.y + ')' );
+                  }
+                  boolvalues_output = [];
+                  for ( var b in data.boolspace[ i ].boolvalues ) {
+                    if ( data.boolspace[ i ].boolvalues[ b ] ) {
+                      boolvalues_output.push( 'true' );
+                    } else {
+                      boolvalues_output.push( 'false' );
+                    }
+                  }
+                  output += '<tr><td>' + ( parseInt( i ) + 1 ) + '</td><td>(' + data.boolspace[ i ].coords.join( ', ' ) + ')</td><td>' + boolvalues_output.join( ', ' ) + '</td><td>' + points_output.join( ', ' ) + '</td><td>' + cover_points_output.join( ', ' ) + '</td></tr>';
+                }
+                output += '</tbody>';
+                output += '</table>';
                 break;
               case 'unordered':
               case 'discrete':
