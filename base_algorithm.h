@@ -139,7 +139,7 @@ class base_algorithm{
 		  for (int i = 1; i < real_dimension; i++) {
 			  int real_i = make_real_i(i);
 			  
-			  m_shape_strides.push_back(m_shape_strides[i - 1] * m_trajectories[modulo(real_i -1,m_dimension)].size());
+			  m_shape_strides.push_back(m_shape_strides[i - 1] * (m_trajectories[modulo(real_i -1,m_dimension)].size() + add_value));
 			  m_freespace_size *= m_trajectories[real_i].size() + add_value;
 		  }
 	  }
