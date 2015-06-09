@@ -71,12 +71,13 @@ abstract class Algorithm {
   }
 
   protected function add_coords( $coords1, $coords2 ) {
-    if ( count( $coords1 ) != count( $coords2 ) ) {
-      return $coords1;
-    }
     $sum = array();
     for( $i = 0; $i < count( $coords1 ); $i++ ) {
-      $sum[] = $coords1[ $i ] + $coords2[ $i ];
+      if ( isset( $coords2[ $i ] ) ) {
+        $sum[] = $coords1[ $i ] + $coords2[ $i ];
+      } else {
+        $sum[] = $coords1[ $i ];
+      }
     }
     return $sum;
   }

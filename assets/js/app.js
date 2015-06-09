@@ -316,11 +316,7 @@ jQuery( document ).ready(function($) {
                   }
                   values_output = [];
                   for ( var v in data.boolspace[ i ].values ) {
-                    if ( data.boolspace[ i ].values[ v ] ) {
-                      values_output.push( 'true' );
-                    } else {
-                      values_output.push( 'false' );
-                    }
+                    values_output.push( data.boolspace[ i ].values[ v ] );
                   }
                   output += '<tr><td>' + ( parseInt( i ) + 1 ) + '</td><td>(' + data.boolspace[ i ].coords.join( ', ' ) + ')</td><td>' + values_output.join( ', ' ) + '</td><td>' + points_output.join( ', ' ) + '</td><td>' + cover_points_output.join( ', ' ) + '</td></tr>';
                 }

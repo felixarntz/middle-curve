@@ -16,12 +16,7 @@ class BoolspacePoint {
 
   public function set_values( $values ) {
     $this->values = $values;
-    foreach ( $this->values as $value ) {
-      if ( $value ) {
-        $this->mainvalue = true;
-        break;
-      }
-    }
+    $this->mainvalue = min( $this->values );
   }
 
   public function get_values() {
