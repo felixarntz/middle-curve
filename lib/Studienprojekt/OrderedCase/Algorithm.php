@@ -29,29 +29,29 @@ class Algorithm extends \Studienprojekt\Base\Algorithm {
     for ( $i = 0; $i < $this->freespace_size; $i++ ) {
       $coords = $this->index_to_coords( $i );
       $this->freespace[ $i ] = new \Studienprojekt\OrderedCase\BoolspacePoint( $coords, $this->infinite );
-      $boolvalues = array();
+      $values = array();
 
       // Fall A (1 boolvalue) --> Regel 1
-      $boolvalues[] = $this->rule_1( $coords );
+      $values[] = $this->rule_1( $coords );
 
       // Fall B/D (2^k - 2 boolvalues) --> Regel 2
       for ( $j = 1; $j <= intval( pow( 2, $this->dimension ) - 2 ); $j++ ) {
-        $boolvalues[] = $this->rule_2( $coords, $j );
+        $values[] = $this->rule_2( $coords, $j );
       }
 
       // Fall C/E (k boolvalues) --> Regel 3
       for ( $j = 1; $j <= $this->dimension; $j++ ) {
-        $boolvalues[] = $this->rule_3( $coords, $j );
+        $values[] = $this->rule_3( $coords, $j );
       }
 
       // Fall F/G (k * (2^(k-1) - 1) boolvalues) --> Regel 4
       for ( $j = 1; $j <= $this->dimension; $j++ ) {
         for ( $k = 1; $k <= intval( pow( 2, $this->dimension - 1 ) - 1 ); $k++ ) {
-          $boolvalues[] = $this->rule_4( $coords, $j, $k );
+          $values[] = $this->rule_4( $coords, $j, $k );
         }
       }
 
-      $this->freespace[ $i ]->set_values( $boolvalues );
+      $this->freespace[ $i ]->set_values( $values );
     }
   }
 
