@@ -6,31 +6,31 @@ class BoolspacePoint {
   protected $indices = array();
   protected $dimension = 0;
   protected $mainvalue = false;
-  protected $boolvalues = array();
+  protected $values = array();
 
-  public function __construct( $indices ) {
+  public function __construct( $indices, $infinite ) {
     $this->indices = $indices;
     $this->dimension = intval( count( $this->indices ) / 2 );
+    $this->mainvalue = $infinite;
   }
 
-  public function set_boolvalues( $boolvalues ) {
-    $this->boolvalues = $boolvalues;
-    $this->mainvalue = false;
-    foreach ( $this->boolvalues as $boolvalue ) {
-      if ( $boolvalue ) {
+  public function set_values( $values ) {
+    $this->values = $values;
+    foreach ( $this->values as $value ) {
+      if ( $value ) {
         $this->mainvalue = true;
         break;
       }
     }
   }
 
-  public function get_boolvalues() {
-    return $this->boolvalues;
+  public function get_values() {
+    return $this->values;
   }
 
-  public function get_boolvalue_at( $i ) {
-    if ( isset( $this->boolvalues[ $i ] ) ) {
-      return $this->boolvalues[ $i ];
+  public function get_value_at( $i ) {
+    if ( isset( $this->values[ $i ] ) ) {
+      return $this->values[ $i ];
     }
   }
 

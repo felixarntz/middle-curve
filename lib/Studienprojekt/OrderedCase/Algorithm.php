@@ -3,6 +3,7 @@
 namespace Studienprojekt\OrderedCase;
 
 class Algorithm extends \Studienprojekt\Base\Algorithm {
+  protected $infinite = false;
   protected $epsilon_temp = 5; // temp var for epsilon
 
   public function run() {
@@ -19,45 +20,15 @@ class Algorithm extends \Studienprojekt\Base\Algorithm {
         'coords'          => $boolspace_point->get_indices(),
         'points'          => $this->get_points_for_output( $boolspace_point->get_indices() ),
         'cover_points'    => $this->get_points_for_output( $boolspace_point->get_indices(), 'cover' ),
-        'boolvalues'      => $boolspace_point->get_boolvalues(),
+        'values'          => $boolspace_point->get_values(),
       );
     }
-  }
-
-  protected function get_points_for_output( $coords, $mode = 'default' ) {
-    $points = array();
-    $start = 0;
-    $end = $this->dimension;
-    $subtract = 0;
-    if ( $mode == 'cover' ) {
-      $start += $this->dimension;
-      $end += $this->dimension;
-      $subtract += $this->dimension;
-    }
-    for ( $i = $start; $i < $end; $i++ ) {
-      if ( $coords[ $i ] > 0 ) {
-        $points[] = $this->get_point_for_output( $this->trajectories[ $i - $subtract ]->get_point( $coords[ $i ] - 1 ) );
-      }
-    }
-    return $points;
-  }
-
-  protected function get_point_for_output( $point ) {
-    return array(
-      'index'           => $point->get_index(),
-      'trajectory_name' => $this->trajectories[ $point->get_trajectory_index() ]->get_name(),
-      'pos'             => array(
-        'x'               => $point->get_pos_x(),
-        'y'               => $point->get_pos_y(),
-      ),
-      'time'            => $point->get_time(),
-    );
   }
 
   protected function fill_free_space() {
     for ( $i = 0; $i < $this->freespace_size; $i++ ) {
       $coords = $this->index_to_coords( $i );
-      $this->freespace[ $i ] = new \Studienprojekt\OrderedCase\BoolspacePoint( $coords );
+      $this->freespace[ $i ] = new \Studienprojekt\OrderedCase\BoolspacePoint( $coords, $this->infinite );
       $boolvalues = array();
 
       // Fall A (1 boolvalue) --> Regel 1
@@ -80,7 +51,7 @@ class Algorithm extends \Studienprojekt\Base\Algorithm {
         }
       }
 
-      $this->freespace[ $i ]->set_boolvalues( $boolvalues );
+      $this->freespace[ $i ]->set_values( $boolvalues );
     }
   }
 
@@ -135,7 +106,7 @@ class Algorithm extends \Studienprojekt\Base\Algorithm {
     $added_index = $this->coords_to_index( $this->add_coords( $coords, $add_coords ) );
 
     // Rück-Referenz auf Regel 2 an derselben Stelle
-    if ( $this->freespace[ $added_index ]->get_boolvalue_at( $this->get_rule_index( $rule_counter, 2 ) ) ) {
+    if ( $this->freespace[ $added_index ]->get_value_at( $this->get_rule_index( $rule_counter, 2 ) ) ) {
       return true;
     }
 
@@ -144,11 +115,11 @@ class Algorithm extends \Studienprojekt\Base\Algorithm {
       if ( $value == 0 ) {
         $subcounter = $this->make_decimal( $this->strip_choice_index( $key, $choice ) );
         if ( $subcounter == 0 ) { //TODO: Zugriff auf Regel 3? Oder gar kein Zugriff?
-          if ( $this->freespace[ $added_index ]->get_boolvalue_at( $this->get_rule_index( $key + 1, 3 ) ) ) {
+          if ( $this->freespace[ $added_index ]->get_value_at( $this->get_rule_index( $key + 1, 3 ) ) ) {
             return true;
           }
         } else {
-          if ( $this->freespace[ $added_index ]->get_boolvalue_at( $this->get_rule_index( $key + 1, 4, $subcounter ) ) ) {
+          if ( $this->freespace[ $added_index ]->get_value_at( $this->get_rule_index( $key + 1, 4, $subcounter ) ) ) {
             return true;
           }
         }
@@ -187,7 +158,7 @@ class Algorithm extends \Studienprojekt\Base\Algorithm {
 
     // Rück-Referenz auf Regel 1
     $add_coords = $this->get_add_coords( $this->make_binary( 0, $this->dimension ), 3 );
-    if ( $this->freespace[ $this->coords_to_index( $this->add_coords( $coords, $add_coords ) ) ]->get_boolvalue_at( $this->get_rule_index( 1, 1 ) ) ) {
+    if ( $this->freespace[ $this->coords_to_index( $this->add_coords( $coords, $add_coords ) ) ]->get_value_at( $this->get_rule_index( 1, 1 ) ) ) {
       return true;
     }
 
@@ -195,7 +166,7 @@ class Algorithm extends \Studienprojekt\Base\Algorithm {
     $choices = $this->get_binary_choices( 0, intval( pow( 2, $this->dimension ) - 1 ), $this->dimension );
     foreach ( $choices as $choice ) {
       $add_coords = $this->get_add_coords( $choice, 3 );
-      if ( $this->freespace[ $this->coords_to_index( $this->add_coords( $coords, $add_coords ) ) ]->get_boolvalue_at( $this->get_rule_index( $rule_counter, 3 ) ) ) {
+      if ( $this->freespace[ $this->coords_to_index( $this->add_coords( $coords, $add_coords ) ) ]->get_value_at( $this->get_rule_index( $rule_counter, 3 ) ) ) {
         return true;
       }
     }
@@ -245,7 +216,7 @@ class Algorithm extends \Studienprojekt\Base\Algorithm {
 
     // Rück-Referenz auf Regel 2
     $rule_2_index = $this->make_decimal( $this->insert_choice_index( $rule_counter - 1, $choice ) );
-    if ( $this->freespace[ $added_index ]->get_boolvalue_at( $this->get_rule_index( $rule_2_index, 2 ) ) ) {
+    if ( $this->freespace[ $added_index ]->get_value_at( $this->get_rule_index( $rule_2_index, 2 ) ) ) {
       return true;
     }
 
@@ -259,11 +230,11 @@ class Algorithm extends \Studienprojekt\Base\Algorithm {
           $subcounter = $this->make_decimal( $this->insert_choice_index( $rule_counter - 1, $this->strip_choice_index( $key, $choice ) ) );
         }
         if ( $subcounter == 0 ) {
-          if ( $this->freespace[ $added_index ]->get_boolvalue_at( $this->get_rule_index( $key + 1, 3 ) ) ) {
+          if ( $this->freespace[ $added_index ]->get_value_at( $this->get_rule_index( $key + 1, 3 ) ) ) {
             return true;
           }
         } else {
-          if ( $this->freespace[ $added_index ]->get_boolvalue_at( $this->get_rule_index( $key + 1, 4, $subcounter ) ) ) {
+          if ( $this->freespace[ $added_index ]->get_value_at( $this->get_rule_index( $key + 1, 4, $subcounter ) ) ) {
             return true;
           }
         }
@@ -273,7 +244,7 @@ class Algorithm extends \Studienprojekt\Base\Algorithm {
     // Rück-Referenzen auf Regel 4 an derselben Stelle für jeweils eine der hinteren Stellen -1 gesetzt
     for ( $i = 0; $i < $this->dimension; $i++ ) {
       $add_coords = $this->get_add_coords( $this->make_binary( intval( pow( 2, $i ) ), $this->dimension ), 4 );
-      if ( $this->freespace[ $this->coords_to_index( $this->add_coords( $coords, $add_coords ) ) ]->get_boolvalue_at( $rule_counter, 4, $inner_rule_counter ) ) {
+      if ( $this->freespace[ $this->coords_to_index( $this->add_coords( $coords, $add_coords ) ) ]->get_value_at( $rule_counter, 4, $inner_rule_counter ) ) {
         return true;
       }
     }
@@ -378,6 +349,36 @@ class Algorithm extends \Studienprojekt\Base\Algorithm {
 
   protected function calc_distance( $pos1, $pos2 ) {
     return sqrt( pow( $pos1[0] - $pos2[0], 2 ) + pow( $pos1[1] - $pos2[1], 2 ) );
+  }
+
+  protected function get_points_for_output( $coords, $mode = 'default' ) {
+    $points = array();
+    $start = 0;
+    $end = $this->dimension;
+    $subtract = 0;
+    if ( $mode == 'cover' ) {
+      $start += $this->dimension;
+      $end += $this->dimension;
+      $subtract += $this->dimension;
+    }
+    for ( $i = $start; $i < $end; $i++ ) {
+      if ( $coords[ $i ] > 0 ) {
+        $points[] = $this->get_point_for_output( $this->trajectories[ $i - $subtract ]->get_point( $coords[ $i ] - 1 ) );
+      }
+    }
+    return $points;
+  }
+
+  protected function get_point_for_output( $point ) {
+    return array(
+      'index'           => $point->get_index(),
+      'trajectory_name' => $this->trajectories[ $point->get_trajectory_index() ]->get_name(),
+      'pos'             => array(
+        'x'               => $point->get_pos_x(),
+        'y'               => $point->get_pos_y(),
+      ),
+      'time'            => $point->get_time(),
+    );
   }
 
   protected function make_real_i( $i ) {
