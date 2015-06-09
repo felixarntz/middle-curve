@@ -19,6 +19,8 @@ class base_algorithm{
 		//Abstrakte Funktionen
 		virtual int make_real_i(int i) = 0;
 		virtual int make_real_dimension() = 0;
+		virtual int make_add_value() = 0;
+
 
 		//Funktionen
 		int coords_to_index(vector<int> coords) {
@@ -27,10 +29,12 @@ class base_algorithm{
 				return -1;
 			}
 
+			int add_value = make_add_value();
+
 			int index = 0;
 			for (int i = real_dimension - 1; i >= 0; i--) {
 				int real_i = make_real_i(i);
-				if (coords[i] >= m_trajectories[real_i].size()) {
+				if (coords[i] >= m_trajectories[real_i].size() + add_value) {
 					return -1;
 				}
 				index += coords[i] * m_shape_strides[i];
@@ -126,14 +130,17 @@ class base_algorithm{
 	  void run(){
 		  
 		  int real_dimension = make_real_dimension();
+
+		  int add_value = make_add_value();
+
 		  m_shape_strides.push_back(1);
-		  m_freespace_size = m_trajectories[0].size();
+		  m_freespace_size = m_trajectories[0].size() + add_value;
 
 		  for (int i = 1; i < real_dimension; i++) {
 			  int real_i = make_real_i(i);
 			  
 			  m_shape_strides.push_back(m_shape_strides[i - 1] * m_trajectories[modulo(real_i -1,m_dimension)].size());
-			  m_freespace_size *= m_trajectories[real_i].size();
+			  m_freespace_size *= m_trajectories[real_i].size() + add_value;
 		  }
 	  }
 };

@@ -119,6 +119,10 @@ public:
 		return sqrt(pow(pos1[0] - pos2[0], 2) + pow(pos1[1] - pos2[1], 2));
 	}
 
+	int make_add_value(){ 
+		return 0; 
+	}
+
 	//Ausgabe
 	void printResults() {
 		vector<int> i;

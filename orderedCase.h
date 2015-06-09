@@ -13,6 +13,9 @@ class OrderedCase : base_algorithm<T> {
 protected:
 	vector<BS_Point<T>> m_boolspace;
 
+	double m_epsilon = 5.0;
+
+
 	void fill_bool_space(){
 		
 		for (int i = 0; i < m_freespace_size; i++){
@@ -70,15 +73,86 @@ protected:
 	}
 
 	bool rule_2(vector<int> coords, int rule_counter){
-
+		//To Do
 	}
 
 	bool rule_3(vector<int> coords, int rule_counter){
+		if (rule_counter < 1){
+			return false;
+		}
 
+		if (coords[rule_counter-1] == 0 || has_coord_zero(coords, 0, m_dimension)){
+			return false;
+		}
+
+		TrajectoryObs<double, T> current_point = m_trajectories[rule_counter - 1][coords[rule_counter - 1] - 1];
+		for (int x = 0; x < m_dimension; x++){
+			TrajectoryObs<double, T> temp_point = m_trajectories[x][coords[x + m_dimension] - 1];
+			if (!check_distance(current_point.pos, temp_point.pos)){
+				return false;
+			}
+		}
+
+		vector<int> add_coords = get_add_coords(make_Binary(0, m_dimension), 3);
+		if (m_boolspace[coords_to_index(add_coords(coords, add_coords))].getBoolvalueAt(get_rule_index(1, 1))){
+			return true;
+		}
+
+		vector<vector<int>> choices = get_binary_choices(0, (int)(pow(2, m_dimension)-1), m_dimension);
+		for (auto choice : choices){
+			add_coords = get_add_coords(choice, 3);
+			if (m_boolspace[coords_to_index(add_coords(coords, add_coords))].getBoolvalueAt(get_rule_index(rule_counter, 3))){
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	bool rule_4(vector<int> coords, int rule_counter, int inner_rule_counter){
+		//To Do
+	}
 
+	int get_rule_index(int rule_counter, int rule = 0, int inner_rule_counter = 0){
+		if (rule < 1 || rule > 4){
+			return -1;
+		}
+		if (rule == 1){
+			return 0;
+		}
+
+		rule_counter -= 1;
+		int index = 1;
+
+		if (rule > 2){
+			index += pow(2, m_dimension)-2;
+		}
+
+		if (rule > 3){
+			index += m_dimension + (rule_counter - 1)*(pow(2, m_dimension - 1) - 1);
+			return index + inner_rule_counter;
+		}
+
+		return index + rule_counter;
+	}
+
+	int make_add_value(){
+		return 1;
+	}
+
+	//Ueberprueft ob einer der Koordinaten in 'coords' eine 0 ist.
+	bool has_coord_zero(vector<int> coords, int limit = 0, int offset = 0){
+		if (limit == 0){
+			limit = coords.size();
+		}
+
+		for (int i = offset; i < limit; i++){
+			if (coords[i] == 0){
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	vector<int> get_Boundary_Coords(vector<int> binaryChoice, int rule){
@@ -138,8 +212,21 @@ protected:
 				output.push_back(0);
 			} break;
 
-		case 3: break; //B
-		case 4: break; //B
+		case 3:
+		case 4:
+			for (int i = 0; i < m_dimension; i++){
+				output.push_back(0);
+			}
+			for (int i = 0; i < m_dimension; i++){
+				
+				if (binaryChoice[i] == 0){
+					output.push_back(-1);
+				}
+				else{
+					output.push_back(0);
+				}
+				
+			} break; 
 
 		default:
 			for (int i = 0; i < (2*m_dimension); i++){
@@ -164,7 +251,6 @@ public:
 
 	void run(){
 		base_algorithm::run();
-		m_bool_size = pow(2, m_dimension - 1) * (m_dimension + 2) - 1;
 		
 		/*
 		int i = 750;
@@ -185,4 +271,13 @@ public:
 	void printResults(){
 		
 	}
+
+	bool check_distance(double pos1[], double pos2[]){
+		return (calc_distance(pos1, pos2) <= m_epsilon);
+	}
+
+	double calc_distance(double pos1[], double pos2[]) {
+		return sqrt(pow(pos1[0] - pos2[0], 2) + pow(pos1[1] - pos2[1], 2));
+	}
+
 };
