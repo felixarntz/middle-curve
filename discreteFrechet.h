@@ -18,11 +18,11 @@ template<size_t T>
 class DiscreteFrechet : public base_algorithm<T> {
 
 protected:
-	
+
 	vector<vector<int>> m_choices;
-	vector<FS_Point<T>> m_result;
+	FS_Point<T> * m_result = nullptr;
 	vector<FS_Point<T>> m_freespace;
-	
+
 	int make_real_i(int i){
 		return i;
 	}
@@ -31,17 +31,17 @@ protected:
 		return m_dimension;
 	}
 
-	void fill_free_space() {
-		
+	virtual void fill_free_space() {
+
 		for (int i = 0; i < m_freespace_size; i++) {
 			vector<int> coords = index_to_coords(i);
 			m_freespace.push_back(FS_Point<T>(coords));
 			double max_distance = 0.0;
-			
+
 			for (int j = 0; j < m_dimension; j++) {
 
 				TrajectoryObs<double, T> current_point = m_trajectories[j][coords[j]];
-				
+
 				for (int k = 0; k < m_dimension; k++) {
 					if (k != j) {
 						TrajectoryObs<double, T> point = m_trajectories[k][coords[k]];
@@ -57,9 +57,9 @@ protected:
 	}
 
 public:
-	DiscreteFrechet(vector<Trajectory<double, T>> trajectories):base_algorithm<T>(trajectories){ }
+	DiscreteFrechet(vector<Trajectory<double, T>> trajectories) :base_algorithm<T>(trajectories){ }
 
-	void run(){	
+	void run(){
 		base_algorithm::run();
 		m_choices = get_binary_choices(1, (int)pow(2, m_dimension), m_dimension);
 		fill_free_space();
@@ -68,7 +68,7 @@ public:
 
 	double find_epsilon(vector<FS_Point<T>> path) {
 		double epsilon = 0.0;
-		for(auto point : path) {
+		for (auto point : path) {
 			double distance = point.get_center_distance();
 			if (distance > epsilon) {
 				epsilon = distance;
@@ -77,48 +77,42 @@ public:
 		return epsilon;
 	}
 
-	vector<FS_Point<T>> find_path() {
+	FS_Point<T> * find_path() {
 		return find_cheapest_path(0);
 	}
 
-	vector<FS_Point<T>> find_cheapest_path(int index) {
-		vector<FS_Point<T>> path;
-		vector<FS_Point<T>> rest_path;
+	FS_Point<T> * find_cheapest_path(int index) {
 
 		if (index == m_freespace_size - 1) {
-			m_freespace[index].set_rest_path(vector<FS_Point<T>>(), 0.0);
-			m_freespace[index].set_visited();
+			m_freespace[index].make_last();
 		}
 		else {
 			if (m_freespace[index].get_visited()) {
-				rest_path = m_freespace[index].get_rest_path();
+				return &m_freespace[index];
 			}
 			else {
 				double cheapest = 100000.0;
-				for(auto choice : m_choices) {
-					
+				FS_Point<T> * next = nullptr;
+				for (auto choice : m_choices) {
+
 					vector<int> next_coords = add_coords(index_to_coords(index), choice);
+
 					int next_index = coords_to_index(next_coords);
-					
+
 					if (next_index > -1) {
-						vector<FS_Point<T>> current_path = find_cheapest_path(next_index);
-						if (current_path[0].get_cost() < cheapest) {
-							rest_path = current_path;
-							cheapest = current_path[0].get_cost();
+						FS_Point<T> * current = find_cheapest_path(next_index);
+						
+						if (current->get_cost() < cheapest) {
+							next = current;
+							cheapest = current->get_cost();
 						}
 					}
 				}
-				m_freespace[index].set_rest_path(rest_path, cheapest);
-				m_freespace[index].set_visited();
+				m_freespace[index].set_next(next, cheapest);
 			}
 		}
-		path.push_back(m_freespace[index]);
 
-		for (auto it : rest_path){
-			path.push_back(it);
-		}
-
-		return path;
+		return &m_freespace[index];
 	}
 
 	double calc_distance(double pos1[], double pos2[]) {
@@ -128,11 +122,13 @@ public:
 	//Ausgabe
 	void printResults() {
 		vector<int> i;
-		
-		for (auto it : m_result){
-			
+
+		FS_Point<T> * temp = m_result;
+
+		while(true){
+
 			cout << "(";
-			vector<int> indi = it.get_indices();
+			vector<int> indi = temp->get_indices();
 			for (int i = 0; i < indi.size(); i++){
 				cout << indi[i];
 				if (i != indi.size() - 1){
@@ -140,19 +136,25 @@ public:
 				}
 			}
 			cout << ") | CenterPoint: (";
-				
-			
-			for (int i = 0; i < (sizeof(it.get_center_point().pos) / sizeof(*it.get_center_point().pos)); i++){
-				cout << it.get_center_point().pos[i];
-				if (i != (sizeof(it.get_center_point().pos) / sizeof(*it.get_center_point().pos)) - 1){
+
+
+			for (int i = 0; i < (sizeof(temp->get_center_point().pos) / sizeof(*temp->get_center_point().pos)); i++){
+				cout << temp->get_center_point().pos[i];
+				if (i != (sizeof(temp->get_center_point().pos) / sizeof(*temp->get_center_point().pos)) - 1){
 					cout << ",";
 				}
 			}
-			cout << ") | CenterDistance: " << it.get_center_distance() << endl;
+			cout << ") | CenterDistance: " << temp->get_center_distance() << endl;
+
+			if (!temp->get_has_next()){
+				break;
+			}
+			
+			temp = temp->get_next();
 		}
 	}
 
-	vector<FS_Point<T>> getResult(){
+	FS_Point<T> getResult(){
 		return m_result;
 	}
 };

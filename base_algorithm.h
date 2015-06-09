@@ -119,7 +119,6 @@ class base_algorithm{
 		base_algorithm(vector<Trajectory<double, T>> trajectories){
 			m_trajectories = trajectories;
 			m_dimension = trajectories.size();
-			
 		}
 
 	  virtual void printResults() = 0;
@@ -137,8 +136,4 @@ class base_algorithm{
 			  m_freespace_size *= m_trajectories[real_i].size();
 		  }
 	  }
-
-	 
-	 
-
 };

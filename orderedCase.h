@@ -21,37 +21,67 @@ protected:
 			vector<bool> bool_values;
 
 			//Regel 1 (1 Boolvalue)
-			if (i == 0){
-				bool_values.push_back(true);
-			}
-			else{
-				vector<int> choice = make_Binary(0, m_dimension);
-				vector<int> boundary_Coords[2] = get_Boundary_Coords(choice, 1);
-				if (is_in_boundaries(coords, boundary_Coords[0], boundary_Coords[1])){
-					bool_values.push_back(false);
-				}
-				else{
-					vector<vector<int>> choices = get_binary_choices(1, (int)pow(2, m_dimension), m_dimension);
-					for (choice : choices){
-						boundary_Coords = get_Boundary_Coords(choice, 1);
-						if (is_in_boundaries(coords, boundary_Coords[0], boundary_Coords[1])){
-							vector<int> temp_add_coords = get_add_coords(choice, 1);
-							bool_values.push_back(m_boolspace[coords_to_index(add_coords(coords, temp_add_coords))].getMainvalue());
-						}
-					}
-				}
-			}
+			bool_values.push_back(rule_1(coords));
 
 			//Regel 2 (2^k -2 Boolvalues)
+			for (int j = 1; j <= (int)(pow(2, m_dimension) - 2); j++) {
+				bool_values.push_back(rule_2(coords, j));
+			}
 
 			//Regel 3 (k Boolvalues)
+			for (int j = 1; j <= m_dimension; j++) {
+				bool_values.push_back(rule_3(coords, j));
+			}
 
 			//Regel 4 (k*(2^(k-1)-1) Boolvalues)
+			for (int j = 1; j <= m_dimension; j++) {
+				for (int k = 1; k <= (int)(pow(2, m_dimension - 1) - 1); k++){
+					bool_values.push_back(rule_4(coords, j, k));
+				}
+			}
 
+			m_boolspace[i].set_boolvalues(bool_values);
 		}
 	}
 
-	array<vector<int>, 2> get_Boundary_Coords(vector<int> binaryChoice, int rule){
+	bool rule_1(vector<int> coords){
+		if (coords_to_index(coords) == 0){
+			return true;
+		}
+		
+		vector<int> choice = make_Binary(0, m_dimension);
+		vector<int> boundary_Coords[2] = get_Boundary_Coords(choice, 1);
+		if (is_in_boundaries(coords, boundary_Coords[0], boundary_Coords[1])){
+			return false;
+		}
+		
+		vector<vector<int>> choices = get_binary_choices(1, (int)pow(2, m_dimension), m_dimension);
+		for (choice : choices){
+			boundary_Coords = get_Boundary_Coords(choice, 1);
+			if (is_in_boundaries(coords, boundary_Coords[0], boundary_Coords[1])){
+		
+				vector<int> temp_add_coords = get_add_coords(choice, 1);
+				return m_boolspace[coords_to_index(add_coords(coords, temp_add_coords))].getMainvalue();
+			
+			}
+		}
+
+		return false;
+	}
+
+	bool rule_2(vector<int> coords, int rule_counter){
+
+	}
+
+	bool rule_3(vector<int> coords, int rule_counter){
+
+	}
+
+	bool rule_4(vector<int> coords, int rule_counter, int inner_rule_counter){
+
+	}
+
+	vector<int> get_Boundary_Coords(vector<int> binaryChoice, int rule){
 		vector<int> output[2] = {
 			vector<int>,
 			vector<int>
