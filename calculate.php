@@ -8,6 +8,9 @@ $response = array(
   'error' => '',
 );
 
+ini_set( 'log_errors', '1' );
+ini_set( 'error_log', dirname( __FILE__ ) . '/errors.log' );
+
 if ( isset( $_POST ) && isset( $_POST['trajectories'] ) ) {
   $trajectories = $_POST['trajectories'];
   $mode = isset( $_POST['mode'] ) ? $_POST['mode'] : 'discrete';

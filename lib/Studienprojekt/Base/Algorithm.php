@@ -25,7 +25,7 @@ abstract class Algorithm {
 
     for ( $i = 1; $i < $real_dimension; $i++ ) {
       $real_i = $this->make_real_i( $i );
-      $this->shape_strides[ $i ] = $this->shape_strides[ $i - 1 ] * $this->trajectories[ ( $i - 1 ) % ( $this->dimension ]->get_length() + $add_value );
+      $this->shape_strides[ $i ] = $this->shape_strides[ $i - 1 ] * $this->trajectories[ ( $i - 1 ) % $this->dimension ]->get_length() + $add_value;
       $this->freespace_size *= $this->trajectories[ $real_i ]->get_length() + $add_value;
     }
   }

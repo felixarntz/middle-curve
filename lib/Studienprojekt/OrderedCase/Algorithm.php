@@ -120,7 +120,7 @@ class Algorithm extends \Studienprojekt\Base\Algorithm {
 
     $boolvalue = false;
     $choices = $this->get_binary_choices( 0, intval( pow( 2, $this->dimension ) - 1 ), $this->dimension );
-    for ( $choices as $choice ) {
+    foreach ( $choices as $choice ) {
       $add_coords = $this->get_add_coords( $choice, 3 );
       if ( $this->freespace[ $this->coords_to_index( $this->add_coords( $coords, $add_coords ) ) ]->get_boolvalue_at( $this->get_rule_index( $rule_counter, 3 ) ) ) {
         $boolvalue = true;

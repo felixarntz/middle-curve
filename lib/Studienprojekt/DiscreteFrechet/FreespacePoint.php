@@ -7,8 +7,8 @@ class FreespacePoint {
   protected $center_distance = 100000000.0;
   protected $center_point = null;
 
+  protected $next = -1;
   protected $cost = 100000000.0;
-  protected $rest_path = array();
   protected $visited = false;
 
   public function __construct( $indices ) {
@@ -34,23 +34,20 @@ class FreespacePoint {
     return $this->center_point;
   }
 
-  public function set_rest_path( $rest_path, $cost ) {
+  public function set_next( $index, $cost ) {
     if ( $this->center_distance + $cost < $this->cost ) {
-      $this->rest_path = $rest_path;
+      $this->next = $index;
       $this->cost = $this->center_distance + $cost;
     }
+    $this->visited = true;
+  }
+
+  public function get_next() {
+    return $this->next;
   }
 
   public function get_cost() {
     return $this->cost;
-  }
-
-  public function get_rest_path() {
-    return $this->rest_path;
-  }
-
-  public function set_visited() {
-    $this->visited = true;
   }
 
   public function get_visited() {

@@ -66,10 +66,41 @@ class Algorithm extends \Studienprojekt\Base\Algorithm {
   }
 
   protected function find_path() {
-    return $this->find_cheapest_path( 0, $this->get_binary_choices( 1, intval( pow( 2, $this->dimension ) ), $this->dimension ) );
+    $path = array();
+    $this->find_cheapest_path( 0, $this->get_binary_choices( 1, intval( pow( 2, $this->dimension ) ), $this->dimension ) );
+    $index = 0;
+    while ( $index > -1 ) {
+      $current = $this->freespace[ $index ];
+      $path[] = $current;
+      $index = $current->get_next();
+    }
+    return $path;
   }
 
   protected function find_cheapest_path( $index, $choices ) {
+    if ( $index == $this->freespace_size - 1 ) {
+      $this->freespace[ $index ]->set_next( -1, 0.0 );
+    } else {
+      if ( ! $this->freespace[ $index ]->get_visited() ) {
+        $rest_index = -1;
+        $cheapest = 100000000000.0;
+        foreach ( $choices as $choice ) {
+          $next_coords = $this->add_coords( $this->index_to_coords( $index ), $choice );
+          $next_index = $this->coords_to_index( $next_coords );
+          if ( $next_index > -1 ) {
+            $current_index = $this->find_cheapest_path( $next_index, $choices );
+            if ( $this->freespace[ $current_index ]->get_cost() < $cheapest ) {
+              $rest_index = $current_index;
+              $cheapest = $this->freespace[ $current_index ]->get_cost();
+            }
+          }
+        }
+        $this->freespace[ $index ]->set_next( $rest_index, $cheapest );
+      }
+    }
+  }
+
+  /*protected function find_cheapest_path( $index, $choices ) {
     $path = array();
     $rest_path = array();
 
@@ -99,7 +130,7 @@ class Algorithm extends \Studienprojekt\Base\Algorithm {
     }
     $path[] = $this->freespace[ $index ];
     return array_merge( $path, $rest_path );
-  }
+  }*/
 
   protected function calc_distance( $pos1, $pos2 ) {
     return sqrt( pow( $pos1[0] - $pos2[0], 2 ) + pow( $pos1[1] - $pos2[1], 2 ) );
