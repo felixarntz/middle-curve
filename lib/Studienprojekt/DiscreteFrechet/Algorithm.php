@@ -66,9 +66,9 @@ class Algorithm extends \Studienprojekt\Base\Algorithm {
   }
 
   protected function find_path() {
-    $path = array();
     $this->find_cheapest_path( 0, $this->get_binary_choices( 1, intval( pow( 2, $this->dimension ) ), $this->dimension ) );
     $index = 0;
+    $path = array();
     while ( $index > -1 ) {
       $current = $this->freespace[ $index ];
       $path[] = $current;

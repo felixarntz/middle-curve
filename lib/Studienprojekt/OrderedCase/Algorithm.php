@@ -4,15 +4,18 @@ namespace Studienprojekt\OrderedCase;
 
 class Algorithm extends \Studienprojekt\Base\Algorithm {
   protected $infinite = 1000000000000.0;
-  protected $epsilon_temp = 5; // temp var for epsilon
 
   public function run() {
     parent::run();
 
     $this->fill_free_space();
 
+    $path = $this->find_path();
+
     $this->results = array(
       'boolspace'     => array(),
+      'path'          => array(),
+      'epsilon'       => $this->find_epsilon( $path ),
     );
 
     foreach ( $this->freespace as $key => $boolspace_point ) {
@@ -23,6 +26,12 @@ class Algorithm extends \Studienprojekt\Base\Algorithm {
         'values'          => $boolspace_point->get_values(),
       );
     }
+    foreach ( $path as $key => $boolspace_point ) {
+      $this->results['path'][ $key ] = array(
+        'coords'          => $boolspace_point->get_indices(),
+        'mainvalue'       => $boolspace_point->get_mainvalue(),
+      );
+    }
   }
 
   protected function fill_free_space() {
@@ -31,20 +40,20 @@ class Algorithm extends \Studienprojekt\Base\Algorithm {
       $this->freespace[ $i ] = new \Studienprojekt\OrderedCase\BoolspacePoint( $coords, $this->infinite );
       $values = array();
 
-      // Fall A (1 boolvalue) --> Regel 1
+      // Fall A (1 value) --> Regel 1
       $values[] = $this->rule_1( $coords );
 
-      // Fall B/D (2^k - 2 boolvalues) --> Regel 2
+      // Fall B/D (2^k - 2 values) --> Regel 2
       for ( $j = 1; $j <= intval( pow( 2, $this->dimension ) - 2 ); $j++ ) {
         $values[] = $this->rule_2( $coords, $j );
       }
 
-      // Fall C/E (k boolvalues) --> Regel 3
+      // Fall C/E (k values) --> Regel 3
       for ( $j = 1; $j <= $this->dimension; $j++ ) {
         $values[] = $this->rule_3( $coords, $j );
       }
 
-      // Fall F/G (k * (2^(k-1) - 1) boolvalues) --> Regel 4
+      // Fall F/G (k * (2^(k-1) - 1) values) --> Regel 4
       for ( $j = 1; $j <= $this->dimension; $j++ ) {
         for ( $k = 1; $k <= intval( pow( 2, $this->dimension - 1 ) - 1 ); $k++ ) {
           $values[] = $this->rule_4( $coords, $j, $k );
@@ -122,6 +131,7 @@ class Algorithm extends \Studienprojekt\Base\Algorithm {
       }
     }
     
+    // gib Minimalwert aus Rück-Referenzen zurück
     return min( $values_to_compare );
   }
 
@@ -167,6 +177,7 @@ class Algorithm extends \Studienprojekt\Base\Algorithm {
 
     $values_to_compare[] = min( $subvalues_to_compare );
 
+    // gib Maximalwert aus Rück-Referenzen zurück
     return max( $values_to_compare );
   }
 
@@ -241,6 +252,7 @@ class Algorithm extends \Studienprojekt\Base\Algorithm {
 
     $values_to_compare[] = min( $subvalues_to_compare );
 
+    // gib Maximalwert aus Rück-Referenzen zurück
     return max( $values_to_compare );
   }
 
@@ -270,6 +282,60 @@ class Algorithm extends \Studienprojekt\Base\Algorithm {
     }
 
     return $index + $rule_counter;
+  }
+
+  protected function find_epsilon( $path ) {
+    $epsilon = 0.0;
+    foreach ( $path as $freespace_point ) {
+      $distance = $freespace_point->get_mainvalue();
+      if ( $distance > $epsilon ) {
+        $epsilon = $distance;
+      }
+    }
+    return $epsilon;
+  }
+
+  protected function find_path() {
+    $start_coords = array();
+    for ( $i = 0; $i < $this->dimension; $i++ ) {
+      $start_coords[] = 1;
+    }
+    for ( $i = 0; $i < $this->dimension; $i++ ) {
+      $start_coords[] = $this->trajectories[ $i ]->get_length();
+    }
+    $start_index = $this->coords_to_index( $start_coords );
+    $this->find_cheapest_path( $start_index, $this->get_binary_choices( 1, intval( pow( 2, $this->dimension ) ), $this->dimension ) );
+    $index = $start_index;
+    $path = array();
+    while ( $index > -1 ) {
+      $current = $this->freespace[ $index ];
+      $path[] = $current;
+      $index = $current->get_next();
+    }
+    return $path;
+  }
+
+  protected function find_cheapest_path( $index, $choices ) {
+    if ( $index == $this->freespace_size - 1 ) {
+      $this->freespace[ $index ]->set_next( -1, 0.0 );
+    } else {
+      if ( ! $this->freespace[ $index ]->get_visited() ) {
+        $rest_index = -1;
+        $cheapest = 100000000000.0;
+        foreach ( $choices as $choice ) {
+          $next_coords = $this->add_coords( $this->index_to_coords( $index ), $choice );
+          $next_index = $this->coords_to_index( $next_coords );
+          if ( $next_index > -1 ) {
+            $this->find_cheapest_path( $next_index, $choices );
+            if ( $this->freespace[ $next_index ]->get_cost() < $cheapest ) {
+              $rest_index = $next_index;
+              $cheapest = $this->freespace[ $next_index ]->get_cost();
+            }
+          }
+        }
+        $this->freespace[ $index ]->set_next( $rest_index, $cheapest );
+      }
+    }
   }
 
   protected function insert_choice_index( $index, $choice ) {
@@ -333,10 +399,6 @@ class Algorithm extends \Studienprojekt\Base\Algorithm {
         }
     }
     return $add_coords;
-  }
-
-  protected function check_distance( $pos1, $pos2 ) {
-    return $this->calc_distance( $pos1, $pos2 ) <= $this->epsilon_temp;
   }
 
   protected function calc_distance( $pos1, $pos2 ) {
