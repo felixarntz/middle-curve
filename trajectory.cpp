@@ -22,15 +22,20 @@ int main (int argc, char** argv) {
 	tro2.time = 1;
 
 	TrajectoryObs<double, 2> tro3;
-	tro3.pos[0] = 6.0;
-	tro3.pos[1] = 6.0;
+	tro3.pos[0] = 12.0;
+	tro3.pos[1] = 4.0;
 	tro3.time = 2;
 
+	TrajectoryObs<double, 2> tro4;
+	tro4.pos[0] = 15.0;
+	tro4.pos[1] = 10.0;
+	tro4.time = 3;
 
 	Tr2<double> tra1;
 	tra1.push_back(tro1);
 	tra1.push_back(tro2);
 	tra1.push_back(tro3);
+	tra1.push_back(tro4);
 	
 	//==================================
 	TrajectoryObs<double, 2> tro6;
@@ -43,26 +48,36 @@ int main (int argc, char** argv) {
 	tro7.pos[1] = 8.0;
 	tro7.time = 1;
 
+	TrajectoryObs<double, 2> tro8;
+	tro8.pos[0] = 10.0;
+	tro8.pos[1] = 12.0;
+	tro8.time = 2;
+
+	TrajectoryObs<double, 2> tro9;
+	tro9.pos[0] = 12.0;
+	tro9.pos[1] = 18.0;
+	tro9.time = 3;
+
 	Tr2<double> tra2;
 	tra2.push_back(tro6);
 	tra2.push_back(tro7);
+	tra2.push_back(tro8);
+	tra2.push_back(tro9);
 
 
+	TrajectoryObs<double, 2> tro18;
+	tro18.pos[0] = 4.0;
+	tro18.pos[1] = 8.0;
+	tro18.time = 2;
 
-	TrajectoryObs<double, 2> tro8;
-	tro8.pos[0] = 1.0;
-	tro8.pos[1] = 2.0;
-	tro8.time = 0;
-
-	TrajectoryObs<double, 2> tro9;
-	tro9.pos[0] = 7.0;
-	tro9.pos[1] = 4.0;
-	tro9.time = 1;
+	TrajectoryObs<double, 2> tro19;
+	tro19.pos[0] = 7.0;
+	tro19.pos[1] = 12.0;
+	tro19.time = 3;
 
 	Tr2<double> tra3;
-	tra3.push_back(tro8);
-	tra3.push_back(tro9);
-
+	tra3.push_back(tro18);
+	tra3.push_back(tro19);
 	//==================================
 
 	//// tro is copied on push_back(), so we can edit it and push the same object again
@@ -89,12 +104,11 @@ int main (int argc, char** argv) {
 	//reader.read();
 
 	//DiscreteFrechet<2> un(eingabe);
-	UnorderedCase<2> un(eingabe);
-	//OrderedCase<2> un(eingabe);
+	//UnorderedCase<2> un(eingabe);
+	OrderedCase<2> un(eingabe);
 	un.run();
 	un.printResults();
 
 
 	return 0;
 }
-

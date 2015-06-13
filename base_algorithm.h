@@ -1,6 +1,7 @@
 #pragma once
 #include <stdio.h>
 #include <vector>
+#include <limits>
 #include "trajectory.h"
 
 using namespace std;
@@ -94,27 +95,31 @@ class base_algorithm{
 			return choice;
 		}
 
-		bool is_in_boundaries(vector<int> coords, vector<int> minCoords, vector<int> maxCoords){
-			if (coords.size() != minCoords.size() || coords.size() != maxCoords.size()){
-				return false;
-			}
-			for (int i = 0; i < coords.size(); i++){
-				if (coords[i] < minCoords[i] || coords[i] > maxCoords[i]){
-					return false;
+		int make_decimal(vector<int> binary){
+			int result = 0;
+			int counter = 0;
+
+			for (int i = binary.size() - 1; i >= 0; i--){
+				if (binary[i] == 1){
+					result += pow(2, counter);
 				}
+				counter++;
 			}
-			return true;
+			return result;
 		}
 
 		vector<int> add_coords(vector<int> coords1, vector<int> coords2) {
 			vector<int> sum;
 
-			if (coords1.size() != coords2.size()){
-				return coords1;
-			}
-
 			for (int i = 0; i < coords1.size(); i++) {
-				sum.push_back(coords1[i] + coords2[i]);
+
+				if (i < coords2.size()){
+					sum.push_back(coords1[i] + coords2[i]);
+				}
+				else{
+					sum.push_back(coords1[i]);
+				}
+
 			}
 			return sum;
 		}

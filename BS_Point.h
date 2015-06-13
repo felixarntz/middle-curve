@@ -1,6 +1,8 @@
 #pragma once
 
 #include <vector>
+#include <algorithm>
+#include <limits>
 
 #include "trajectory.h"
 #include "base_point.h"
@@ -11,40 +13,69 @@ template<size_t T>
 class BS_Point :public base_point<T>{
 
 protected:
-	int dimension = 0;
-	bool mainvalue = false;
-	vector<bool> boolvalues;
+	int m_dimension = 0;
+	double m_mainvalue = false;
+	vector<double> m_values;
+
+	BS_Point<T> * m_next = nullptr;
+	double m_cost = numeric_limits<float>::infinity();
+	bool m_visited = false;
+	bool m_has_next = false;
 
 public:
 	BS_Point(vector<int> coords) : base_point(coords){
-		dimension = (int)(coords.size() / 2);
+		m_dimension = (int)(coords.size() / 2);
 	}
 
-	void set_boolvalues(vector<bool> boolval){
-		boolvalues = boolval;
-		mainvalue = false;
+	void set_values(vector<double> val){
+		m_values = val;
+		m_mainvalue = *min_element(val.begin(), val.end());
+	}
 
-		for (auto it : boolval){
-			if (it){
-				mainvalue = it;
-				break;
-			}
+	BS_Point<T>* get_next(){
+		return m_next;
+	}
+
+	void set_next(BS_Point<T> * point, double cost){
+		if (m_mainvalue+cost < m_cost){
+			m_next = point;
+			m_cost = m_mainvalue + cost;
+			m_has_next = true;
 		}
+		m_visited = true;
 	}
 	
-	int getDimension(){
-		return dimension;
+	int get_dimension(){
+		return m_dimension;
 	}
 
-	bool getMainvalue(){
-		return mainvalue;
+	double get_mainvalue(){
+		return m_mainvalue;
 	}
 
-	vector<bool> getBoolvalues(){
-		return boolvalues;
+	double get_cost() {
+		return m_cost;
 	}
 
-	bool getBoolvalueAt(int i){
-		return boolvalues[i];
+	vector<double> get_values(){
+		return m_values;
+	}
+
+	double get_value_at(int i){
+		return m_values[i];
+	}
+
+	bool get_visited(){
+		return m_visited;
+	}
+
+	void make_last(){
+		m_cost = m_mainvalue;
+		m_next = nullptr;
+		m_visited = true;
+	}
+
+	bool get_has_next() {
+		return m_has_next;
 	}
 };

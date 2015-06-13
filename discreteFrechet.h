@@ -66,17 +66,6 @@ public:
 		m_result = find_path();
 	}
 
-	double find_epsilon(vector<FS_Point<T>> path) {
-		double epsilon = 0.0;
-		for (auto point : path) {
-			double distance = point.get_center_distance();
-			if (distance > epsilon) {
-				epsilon = distance;
-			}
-		}
-		return epsilon;
-	}
-
 	FS_Point<T> * find_path() {
 		return find_cheapest_path(0);
 	}
