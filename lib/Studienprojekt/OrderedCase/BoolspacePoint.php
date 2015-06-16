@@ -8,9 +8,8 @@ class BoolspacePoint {
   protected $mainvalue = 0.0;
   protected $values = array();
 
-  protected $next = -1;
-  protected $cost = 1000000000000000000.0;
-  protected $visited = false;
+  protected $center_point = null;
+  protected $previous = -1;
 
   public function __construct( $indices, $infinite ) {
     $this->indices = $indices;
@@ -41,24 +40,25 @@ class BoolspacePoint {
     return $this->mainvalue;
   }
 
-  public function set_next( $index, $cost ) {
-    if ( $this->mainvalue + $cost < $this->cost ) {
-      $this->next = $index;
-      $this->cost = $this->mainvalue + $cost;
+  public function set_center_point( $center_point, $distance ) {
+    if ( $distance < $this->mainvalue ) {
+      $this->mainvalue = $distance;
+      $this->center_point = $center_point;
     }
-    $this->visited = true;
   }
 
-  public function get_next() {
-    return $this->next;
+  public function get_center_point() {
+    return $this->center_point;
   }
 
-  public function get_cost() {
-    return $this->cost;
+  public function set_previous( $previous ) {
+    if ( $previous > -1 ) {
+      $this->previous = $previous;
+    }
   }
 
-  public function get_visited() {
-    return $this->visited;
+  public function get_previous() {
+    return $this->previous;
   }
 
   public function get_dimension() {

@@ -5,6 +5,8 @@ namespace Studienprojekt\OrderedCase;
 class Algorithm extends \Studienprojekt\Base\Algorithm {
   protected $infinite = 1000000000000.0;
 
+  protected $current_bs_point = null;
+
   public function run() {
     parent::run();
 
@@ -29,6 +31,7 @@ class Algorithm extends \Studienprojekt\Base\Algorithm {
     foreach ( $path as $key => $boolspace_point ) {
       $this->results['path'][ $key ] = array(
         'coords'          => $boolspace_point->get_indices(),
+        'center_point'    => $this->get_point_for_output( $boolspace_point->get_center_point() ),
         'mainvalue'       => $boolspace_point->get_mainvalue(),
       );
     }
@@ -37,7 +40,8 @@ class Algorithm extends \Studienprojekt\Base\Algorithm {
   protected function fill_free_space() {
     for ( $i = 0; $i < $this->freespace_size; $i++ ) {
       $coords = $this->index_to_coords( $i );
-      $this->freespace[ $i ] = new \Studienprojekt\OrderedCase\BoolspacePoint( $coords, $this->infinite );
+      $this->current_bs_point = new \Studienprojekt\OrderedCase\BoolspacePoint( $coords, $this->infinite );
+
       $values = array();
 
       // Fall A (1 value) --> Regel 1
@@ -60,7 +64,9 @@ class Algorithm extends \Studienprojekt\Base\Algorithm {
         }
       }
 
-      $this->freespace[ $i ]->set_values( $values );
+      $this->current_bs_point->set_values( $values );
+
+      $this->freespace[ $i ] = $this->current_bs_point;
     }
   }
 
@@ -87,7 +93,8 @@ class Algorithm extends \Studienprojekt\Base\Algorithm {
     }
 
     // Rück-Referenz auf Gesamtregel für alle vorderen Koordinaten > 0 um 1 verringert
-    return $this->freespace[ $this->coords_to_index( $this->add_coords( $coords, $this->get_add_coords( $choice, 1 ) ) ) ]->get_mainvalue();
+    $added_index = $this->coords_to_index( $this->add_coords( $coords, $this->get_add_coords( $choice, 1 ) ) );
+    return $this->process_back_reference( $this->freespace[ $added_index ]->get_mainvalue(), $added_index );
   }
 
   protected function rule_2( $coords, $rule_counter = 0 ) {
@@ -117,17 +124,13 @@ class Algorithm extends \Studienprojekt\Base\Algorithm {
     $values_to_compare = array();
 
     // Rück-Referenz auf Regel 2 an derselben Stelle
-    $values_to_compare[] = $this->freespace[ $added_index ]->get_value_at( $this->get_rule_index( $rule_counter, 2 ) );
+    $values_to_compare[] = $this->process_back_reference( $this->freespace[ $added_index ]->get_value_at( $this->get_rule_index( $rule_counter, 2 ) ), $added_index );
 
     // Rück-Referenzen auf Regel 3/4 für alle Stellen 0 der Binärzahl
     foreach ( $choice as $key => $value ) {
       if ( $value == 0 ) {
         $subcounter = $this->make_decimal( $this->strip_choice_index( $key, $choice ) );
-        if ( $subcounter == 0 ) { //TODO: Zugriff auf Regel 3? Oder gar kein Zugriff?
-          $values_to_compare[] = $this->freespace[ $added_index ]->get_value_at( $this->get_rule_index( $key + 1, 3 ) );
-        } else {
-          $values_to_compare[] = $this->freespace[ $added_index ]->get_value_at( $this->get_rule_index( $key + 1, 4, $subcounter ) );
-        }
+        $values_to_compare[] = $this->process_back_reference( $this->freespace[ $added_index ]->get_value_at( $this->get_rule_index( $key + 1, 4, $subcounter ) ), $added_index );
       }
     }
     
@@ -159,20 +162,17 @@ class Algorithm extends \Studienprojekt\Base\Algorithm {
     $current_point = $this->trajectories[ $rule_counter - 1 ]->get_point( $coords[ $rule_counter - 1 ] - 1 );
     for ( $x = 0; $x < $this->dimension; $x++ ) {
       $point = $this->trajectories[ $x ]->get_point( $coords[ $x + $this->dimension ] - 1 );
-      $values_to_compare[] = $this->calc_distance( $point->get_pos(), $current_point->get_pos() );
+      $values_to_compare[] = $this->process_distance( $this->calc_distance( $point->get_pos(), $current_point->get_pos() ), $current_point );
     }
 
     $subvalues_to_compare = array();
 
-    // Rück-Referenz auf Regel 1
-    $add_coords = $this->get_add_coords( $this->make_binary( 0, $this->dimension ), 3 );
-    $subvalues_to_compare[] = $this->freespace[ $this->coords_to_index( $this->add_coords( $coords, $add_coords ) ) ]->get_value_at( $this->get_rule_index( 1, 1 ) );
-
-    // Rück-Referenzen auf Regel 3 an derselben Stelle für alle Binärkombinationen > 0
+    // Rück-Referenzen auf Regeln 1 und 3 an derselben Stelle für alle Binärkombinationen > 0
     $choices = $this->get_binary_choices( 0, intval( pow( 2, $this->dimension ) - 1 ), $this->dimension );
     foreach ( $choices as $choice ) {
-      $add_coords = $this->get_add_coords( $choice, 3 );
-      $subvalues_to_compare[] = $this->freespace[ $this->coords_to_index( $this->add_coords( $coords, $add_coords ) ) ]->get_value_at( $this->get_rule_index( $rule_counter, 3 ) );
+      $added_index = $this->coords_to_index( $this->add_coords( $coords, $this->get_add_coords( $choice, 3 ) ) );
+      $subvalues_to_compare[] = $this->process_back_reference( $this->freespace[ $added_index ]->get_value_at( $this->get_rule_index( 1, 1 ) ), $added_index );
+      $subvalues_to_compare[] = $this->process_back_reference( $this->freespace[ $added_index ]->get_value_at( $this->get_rule_index( $rule_counter, 3 ) ), $added_index );
     }
 
     $values_to_compare[] = min( $subvalues_to_compare );
@@ -212,7 +212,7 @@ class Algorithm extends \Studienprojekt\Base\Algorithm {
     $current_point = $this->trajectories[ $rule_counter - 1 ]->get_point( $coords[ $rule_counter - 1 ] - 1 );
     for ( $x = 0; $x < $this->dimension; $x++ ) {
       $point = $this->trajectories[ $x ]->get_point( $coords[ $x + $this->dimension ] - 1 );
-      $values_to_compare[] = $this->calc_distance( $point->get_pos(), $current_point->get_pos() );
+      $values_to_compare[] = $this->process_distance( $this->calc_distance( $point->get_pos(), $current_point->get_pos() ), $current_point );
     }
 
     $subvalues_to_compare = array();
@@ -225,7 +225,7 @@ class Algorithm extends \Studienprojekt\Base\Algorithm {
 
     // Rück-Referenz auf Regel 2
     $rule_2_index = $this->make_decimal( $this->insert_choice_index( $rule_counter - 1, $choice ) );
-    $subvalues_to_compare[] = $this->freespace[ $added_index ]->get_value_at( $this->get_rule_index( $rule_2_index, 2 ) );
+    $subvalues_to_compare[] = $this->process_back_reference( $this->freespace[ $added_index ]->get_value_at( $this->get_rule_index( $rule_2_index, 2 ) ), $added_index );
 
     // Rück-Referenzen auf Regel 3/4 für alle Stellen 1 der Binärzahl
     foreach ( $choice as $key => $value ) {
@@ -237,23 +237,35 @@ class Algorithm extends \Studienprojekt\Base\Algorithm {
           $subcounter = $this->make_decimal( $this->insert_choice_index( $rule_counter - 1, $this->strip_choice_index( $key, $choice ) ) );
         }
         if ( $subcounter == 0 ) {
-          $subvalues_to_compare[] = $this->freespace[ $added_index ]->get_value_at( $this->get_rule_index( $key + 1, 3 ) );
+          $subvalues_to_compare[] = $this->process_back_reference( $this->freespace[ $added_index ]->get_value_at( $this->get_rule_index( $key + 1, 3 ) ), $added_index );
         } else {
-          $subvalues_to_compare[] = $this->freespace[ $added_index ]->get_value_at( $this->get_rule_index( $key + 1, 4, $subcounter ) );
+          $subvalues_to_compare[] = $this->process_back_reference( $this->freespace[ $added_index ]->get_value_at( $this->get_rule_index( $key + 1, 4, $subcounter ) ), $added_index );
         }
       }
     }
 
     // Rück-Referenzen auf Regel 4 an derselben Stelle für jeweils eine der hinteren Stellen -1 gesetzt
     for ( $i = 0; $i < $this->dimension; $i++ ) {
-      $add_coords = $this->get_add_coords( $this->make_binary( intval( pow( 2, $i ) ), $this->dimension ), 4 );
-      $subvalues_to_compare[] = $this->freespace[ $this->coords_to_index( $this->add_coords( $coords, $add_coords ) ) ]->get_value_at( $this->get_rule_index( $rule_counter, 4, $inner_rule_counter ) );
+      $added_index = $this->coords_to_index( $this->add_coords( $coords, $this->get_add_coords( $this->make_binary( intval( pow( 2, $i ) ), $this->dimension ), 4 ) ) );
+      $subvalues_to_compare[] = $this->process_back_reference( $this->freespace[ $added_index ]->get_value_at( $this->get_rule_index( $rule_counter, 4, $inner_rule_counter ) ), $added_index );
     }
 
     $values_to_compare[] = min( $subvalues_to_compare );
 
     // gib Maximalwert aus Rück-Referenzen zurück
     return max( $values_to_compare );
+  }
+
+  protected function process_back_reference( $value, $index ) {
+    if ( $value < $this->infinite ) {
+      $this->current_bs_point->set_previous( $index );
+    }
+    return $value;
+  }
+
+  protected function process_distance( $distance, $point ) {
+    $this->current_bs_point->set_center_point( $point, $distance );
+    return $distance;
   }
 
   protected function get_rule_index( $rule_counter, $rule = 0, $inner_rule_counter = 0 ) {
@@ -285,57 +297,28 @@ class Algorithm extends \Studienprojekt\Base\Algorithm {
   }
 
   protected function find_epsilon( $path ) {
-    $epsilon = 0.0;
-    foreach ( $path as $freespace_point ) {
-      $distance = $freespace_point->get_mainvalue();
-      if ( $distance > $epsilon ) {
-        $epsilon = $distance;
-      }
-    }
-    return $epsilon;
+    return $path[ count( $path ) - 1 ]->get_mainvalue();
   }
 
   protected function find_path() {
+    $path = array();
+
     $start_coords = array();
     for ( $i = 0; $i < $this->dimension; $i++ ) {
-      $start_coords[] = 1;
+      $start_coords[] = $this->trajectories[ $i ]->get_length();
     }
     for ( $i = 0; $i < $this->dimension; $i++ ) {
       $start_coords[] = $this->trajectories[ $i ]->get_length();
     }
-    $start_index = $this->coords_to_index( $start_coords );
-    $this->find_cheapest_path( $start_index, $this->get_binary_choices( 1, intval( pow( 2, $this->dimension ) ), $this->dimension ) );
-    $index = $start_index;
-    $path = array();
+    $index = $this->coords_to_index( $start_coords );
+
     while ( $index > -1 ) {
       $current = $this->freespace[ $index ];
       $path[] = $current;
-      $index = $current->get_next();
+      $index = $current->get_previous();
     }
-    return $path;
-  }
 
-  protected function find_cheapest_path( $index, $choices ) {
-    if ( $index == $this->freespace_size - 1 ) {
-      $this->freespace[ $index ]->set_next( -1, 0.0 );
-    } else {
-      if ( ! $this->freespace[ $index ]->get_visited() ) {
-        $rest_index = -1;
-        $cheapest = 100000000000.0;
-        foreach ( $choices as $choice ) {
-          $next_coords = $this->add_coords( $this->index_to_coords( $index ), $choice );
-          $next_index = $this->coords_to_index( $next_coords );
-          if ( $next_index > -1 ) {
-            $this->find_cheapest_path( $next_index, $choices );
-            if ( $this->freespace[ $next_index ]->get_cost() < $cheapest ) {
-              $rest_index = $next_index;
-              $cheapest = $this->freespace[ $next_index ]->get_cost();
-            }
-          }
-        }
-        $this->freespace[ $index ]->set_next( $rest_index, $cheapest );
-      }
-    }
+    return array_reverse( $path );
   }
 
   protected function insert_choice_index( $index, $choice ) {
@@ -424,6 +407,17 @@ class Algorithm extends \Studienprojekt\Base\Algorithm {
   }
 
   protected function get_point_for_output( $point ) {
+    if ( $point === null ) {
+      return array(
+        'index'           => -1,
+        'trajectory_name' => 'INVALID',
+        'pos'             => array(
+          'x'               => 0,
+          'y'               => 0,
+        ),
+        'time'            => 0,
+      );
+    }
     return array(
       'index'           => $point->get_index(),
       'trajectory_name' => $this->trajectories[ $point->get_trajectory_index() ]->get_name(),
