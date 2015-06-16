@@ -34,21 +34,20 @@ private:
 		return number;
 	}
 
-	bool greatherThan(const TrajectoryObs<double, T> &a, const TrajectoryObs<double, T> &b){
-		return (a.time < b.time);
-	}
+
 
 	void insertTrajectory(){
 
 		multimap<string, double>::iterator it;
 		TrajectoryObs<double, T> tro;
+		Trajectory<double, T> tra;
 
 		for (it = trajectoryContainer.begin(); it != trajectoryContainer.end();) {
+
 			string key = it->first;
 
-			if (T == 2){ //if wurde aus performance gruenden nach aussen ausgelagert
-				Tr2<double> tra2Dim;
 
+			if (T == 2){ //if wurde aus performance gruenden nach aussen ausgelagert
 				do {//Alle Werte von einem key werden ausgegeben	
 
 					tro.pos[0] = it->second;
@@ -58,19 +57,12 @@ private:
 					tro.time = it->second;
 					++it;
 
-					tra2Dim.push_back(tro);
+					tra.push_back(tro);
 
 				} while (it != trajectoryContainer.end() && key == it->first);
-
-				//sort(tra2Dim.begin(), tra2Dim.end(), greatherThan);
-
-				output.push_back(tra2Dim); //Trajektorie
-				tra2Dim.erase(tra2Dim.begin(), tra2Dim.end());
 			}
-			else { //T==3
-				Tr3<double> tra3Dim;
-
-				do {//Alle Werte von einem key werden ausgegeben				;
+			else { //T==3		
+				do {//Alle Werte von einem key werden ausgegeben				
 					tro.pos[0] = it->second;
 					++it;
 					tro.pos[1] = it->second;
@@ -80,27 +72,40 @@ private:
 					tro.time = it->second;
 					++it;
 
-					//tra3Dim.push_back(tro);
+					tra.push_back(tro);
 
 				} while (it != trajectoryContainer.end() && key == it->first);
+			}
 
-				//	output.push_back(tra3Dim);
-				//	tra3Dim.erase(tra3Dim.begin(), tra3Dim.end());
+			sort(tra.begin(), tra.end(), [](const TrajectoryObs<double, T> &a, const TrajectoryObs<double, T> &b) -> bool {return a.time < b.time; });// Sort Trajectory
+			output.push_back(tra);
+			tra.erase(tra.begin(), tra.end());
+		}
+	}
+
+	void printTest(){
+		int count = 0;
+		for (const vector<TrajectoryObs<double, T>> &a : output){
+			cout << endl << "Trajektorie " << count << endl << endl;
+			count++;
+			for (const TrajectoryObs<double, T> &b : a){
+				cout << b << endl;
 			}
 		}
 	}
 
 
 public:
+
 	vector<Trajectory<double, T>> read(const string& str, char& delim){
 
-		ifstream filestream;
-		filestream.exceptions(ios_base::badbit); //Catch fall prueffen !!!!!		
+		ifstream filestream(str);
+		filestream.exceptions(ios_base::badbit);
 		string member = "", stringPoint = "";
 
 		try{
 
-			filestream.open(str);
+			if (!filestream.is_open()){ throw runtime_error("File not Found"); }
 			filestream.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); // Erste Zeile wird ignoriert
 
 			while (getline(filestream, stringPoint, '\n')){
@@ -112,15 +117,21 @@ public:
 					}
 				}
 			}
-			filestream.close();
+
 		}
 		catch (ios_base::failure& exc){
-			cout << "File not found" << endl;
+			cout << "badbit Error: Read error on i/o operation" << endl;
+			return vector<Trajectory<double, T>>(); //Nichts
+		}
+		catch (exception &e){
+			cout << e.what() << endl;
 			return vector<Trajectory<double, T>>(); //Nichts
 		}
 
 		insertMap();
 		insertTrajectory();
+		printTest();
+		cout << "Datei eingelesen " << endl << endl;
 
 		return output;
 

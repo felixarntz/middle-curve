@@ -18,14 +18,15 @@ int main (int argc, char** argv) {
 	//DiscreteFrechet<2> un(reader.read("\Bsp_2.csv", delim));
 
 	//UnorderedCase<2> un(reader.read("\Bsp_1.csv", delim));
-	UnorderedCase<2> un(reader.read("\Bsp_2.csv", delim));
+	//UnorderedCase<2> un(reader.read("\Bsp_2.csv", delim));
+	//UnorderedCase<2> un(reader.read("\Bsp_3.csv", delim));
 
 	//OrderedCase<2> un(reader.read("\Bsp_1.csv", delim));
 	//OrderedCase<2> un(reader.read("\Bsp_2.csv", delim));
+	OrderedCase<2> un(reader.read("\Bsp_3.csv", delim));
 
 	un.run();
 	un.printResults();
-
 
 	return 0;
 }
