@@ -25,7 +25,7 @@ public:
 					double max_distance = 0.0;
 					for (int a = 0; a < m_dimension; a++){
 						TrajectoryObs<double, T> current_point = m_trajectories[a][coords[a]];
-						double temp_Distance = calc_distance(points[k].pos, current_point.pos);
+						double temp_Distance = DiscreteFrechet::base_algorithm::calc_distance(points[k].pos, current_point.pos);
 						if (temp_Distance > max_distance) {
 							max_distance = temp_Distance;
 						}

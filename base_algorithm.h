@@ -1,4 +1,5 @@
 #pragma once
+#include <iostream>
 #include <stdio.h>
 #include <vector>
 #include <limits>
@@ -147,5 +148,13 @@ class base_algorithm{
 			  m_shape_strides.push_back(m_shape_strides[i - 1] * (m_trajectories[modulo(real_i -1,m_dimension)].size() + add_value));
 			  m_freespace_size *= m_trajectories[real_i].size() + add_value;
 		  }
+	  }
+
+	  double calc_distance(double pos1[], double pos2[]) {
+		  double temp = 0.0;
+		  for (int i = 0; i < T; i++){
+			  temp = temp + pow(pos1[i] - pos2[i], 2);
+		  }
+		  return sqrt(temp);
 	  }
 };

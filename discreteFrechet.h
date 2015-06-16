@@ -45,7 +45,7 @@ protected:
 				for (int k = 0; k < m_dimension; k++) {
 					if (k != j) {
 						TrajectoryObs<double, T> point = m_trajectories[k][coords[k]];
-						double temp_Distance = calc_distance(point.pos, current_point.pos);
+						double temp_Distance = base_algorithm::calc_distance(point.pos, current_point.pos);
 						if (temp_Distance > max_distance) {
 							max_distance = temp_Distance;
 						}
@@ -102,10 +102,6 @@ public:
 		}
 
 		return &m_freespace[index];
-	}
-
-	double calc_distance(double pos1[], double pos2[]) {
-		return sqrt(pow(pos1[0] - pos2[0], 2) + pow(pos1[1] - pos2[1], 2));
 	}
 
 	int make_add_value(){ 
