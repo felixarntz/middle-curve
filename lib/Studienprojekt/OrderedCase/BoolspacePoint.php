@@ -53,7 +53,9 @@ class BoolspacePoint {
 
   public function set_previous( $previous ) {
     if ( $previous > -1 ) {
-      $this->previous = $previous;
+      if ( $this->previous == -1 || $previous < $this->previous ) {
+        $this->previous = $previous;
+      }
     }
   }
 

@@ -162,7 +162,7 @@ class Algorithm extends \Studienprojekt\Base\Algorithm {
     $current_point = $this->trajectories[ $rule_counter - 1 ]->get_point( $coords[ $rule_counter - 1 ] - 1 );
     for ( $x = 0; $x < $this->dimension; $x++ ) {
       $point = $this->trajectories[ $x ]->get_point( $coords[ $x + $this->dimension ] - 1 );
-      $values_to_compare[] = $this->process_distance( $this->calc_distance( $point->get_pos(), $current_point->get_pos() ), $current_point );
+      $values_to_compare[] = $this->process_distance( $this->calc_distance( $point->get_pos(), $current_point->get_pos() ), $point );
     }
 
     $subvalues_to_compare = array();
@@ -212,7 +212,7 @@ class Algorithm extends \Studienprojekt\Base\Algorithm {
     $current_point = $this->trajectories[ $rule_counter - 1 ]->get_point( $coords[ $rule_counter - 1 ] - 1 );
     for ( $x = 0; $x < $this->dimension; $x++ ) {
       $point = $this->trajectories[ $x ]->get_point( $coords[ $x + $this->dimension ] - 1 );
-      $values_to_compare[] = $this->process_distance( $this->calc_distance( $point->get_pos(), $current_point->get_pos() ), $current_point );
+      $values_to_compare[] = $this->process_distance( $this->calc_distance( $point->get_pos(), $current_point->get_pos() ), $point );
     }
 
     $subvalues_to_compare = array();
@@ -258,6 +258,17 @@ class Algorithm extends \Studienprojekt\Base\Algorithm {
 
   protected function process_back_reference( $value, $index ) {
     if ( $value < $this->infinite ) {
+      /*$coords = $this->index_to_coords( $index );
+      for ( $i = 0; $i < $this->dimension; $i++ ) {
+        if ( $coords[ $i ] < 1 ) {
+          return $value;
+        }
+      }
+      for ( $i = $this->dimension; $i < $this->dimension * 2; $i++ ) {
+        if ( $coords[ $i ] != $this->trajectories[ $i - $this->dimension ]->get_length() ) {
+          return $value;
+        }
+      }*/
       $this->current_bs_point->set_previous( $index );
     }
     return $value;

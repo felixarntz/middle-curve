@@ -156,7 +156,7 @@ function collectEntries(formEl) {
           entry.value = el.checked
           break;
         case 'number':
-          entry.value = parseInt(el.value, 10);
+          entry.value = parseFloat(el.value);
           break;
         case 'radio':
           if (el.checked)

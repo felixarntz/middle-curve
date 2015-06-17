@@ -84,8 +84,8 @@
       <div id="point-{{key}}-{{id}}" class="point form-inline">
         <div class="form-group">
           <label>Point {{number}}:</label>
-          <input type="number" name="trajectories[{{key}}][points][{{id}}][x]" class="form-control" placeholder="X coordinate" step="0.5" required>
-          <input type="number" name="trajectories[{{key}}][points][{{id}}][y]" class="form-control" placeholder="Y coordinate" step="0.5" required>
+          <input type="number" name="trajectories[{{key}}][points][{{id}}][x]" class="form-control" placeholder="X coordinate" step="0.25" required>
+          <input type="number" name="trajectories[{{key}}][points][{{id}}][y]" class="form-control" placeholder="Y coordinate" step="0.25" required>
           <input type="text" name="trajectories[{{key}}][points][{{id}}][time]" class="form-control" placeholder="Time">
         </div>
       </div>
