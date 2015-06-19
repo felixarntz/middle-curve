@@ -5,9 +5,11 @@ namespace Studienprojekt\OrderedCase;
 class BoolspacePoint {
   protected $indices = array();
   protected $dimension = 0;
-  protected $mainvalue = 0.0;
   protected $values = array();
+  protected $center_points = array();
+  protected $previouses = array();
 
+  protected $mainvalue = 0.0;
   protected $center_point = null;
   protected $previous = -1;
 
@@ -21,9 +23,16 @@ class BoolspacePoint {
     return $this->indices;
   }
 
-  public function set_values( $values ) {
-    $this->values = $values;
-    $this->mainvalue = min( $this->values );
+  public function add_value( $value, $center_point = null, $previous = -1 ) {
+    $this->values[] = $value;
+    $this->center_points[] = $center_point;
+    $this->previouses[] = $previous;
+
+    if ( $value < $this->mainvalue ) {
+      $this->mainvalue = $value;
+      $this->center_point = $center_point;
+      $this->previous = $previous;
+    }
   }
 
   public function get_values() {
@@ -40,23 +49,8 @@ class BoolspacePoint {
     return $this->mainvalue;
   }
 
-  public function set_center_point( $center_point, $distance ) {
-    if ( $distance < $this->mainvalue ) {
-      $this->mainvalue = $distance;
-      $this->center_point = $center_point;
-    }
-  }
-
   public function get_center_point() {
     return $this->center_point;
-  }
-
-  public function set_previous( $previous ) {
-    if ( $previous > -1 ) {
-      if ( $this->previous == -1 || $previous < $this->previous ) {
-        $this->previous = $previous;
-      }
-    }
   }
 
   public function get_previous() {

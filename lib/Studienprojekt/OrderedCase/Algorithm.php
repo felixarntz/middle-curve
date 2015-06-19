@@ -18,6 +18,7 @@ class Algorithm extends \Studienprojekt\Base\Algorithm {
       'boolspace'     => array(),
       'path'          => array(),
       'epsilon'       => $this->find_epsilon( $path ),
+      'middle_curve'  => array_map( array( $this, 'get_point_for_output' ), $this->build_middle_curve( $path ) ),
     );
 
     foreach ( $this->freespace as $key => $boolspace_point ) {
@@ -42,29 +43,25 @@ class Algorithm extends \Studienprojekt\Base\Algorithm {
       $coords = $this->index_to_coords( $i );
       $this->current_bs_point = new \Studienprojekt\OrderedCase\BoolspacePoint( $coords, $this->infinite );
 
-      $values = array();
-
       // Fall A (1 value) --> Regel 1
-      $values[] = $this->rule_1( $coords );
+      $this->rule_1( $coords );
 
       // Fall B/D (2^k - 2 values) --> Regel 2
       for ( $j = 1; $j <= intval( pow( 2, $this->dimension ) - 2 ); $j++ ) {
-        $values[] = $this->rule_2( $coords, $j );
+        $this->rule_2( $coords, $j );
       }
 
       // Fall C/E (k values) --> Regel 3
       for ( $j = 1; $j <= $this->dimension; $j++ ) {
-        $values[] = $this->rule_3( $coords, $j );
+        $this->rule_3( $coords, $j );
       }
 
       // Fall F/G (k * (2^(k-1) - 1) values) --> Regel 4
       for ( $j = 1; $j <= $this->dimension; $j++ ) {
         for ( $k = 1; $k <= intval( pow( 2, $this->dimension - 1 ) - 1 ); $k++ ) {
-          $values[] = $this->rule_4( $coords, $j, $k );
+          $this->rule_4( $coords, $j, $k );
         }
       }
-
-      $this->current_bs_point->set_values( $values );
 
       $this->freespace[ $i ] = $this->current_bs_point;
     }
@@ -73,210 +70,243 @@ class Algorithm extends \Studienprojekt\Base\Algorithm {
   protected function rule_1( $coords ) {
     // gib true zurück, falls alle Koordinaten 0 sind
     if ( $this->coords_to_index( $coords ) == 0 ) {
-      return 0.0;
-    }
+      $this->current_bs_point->add_value( 0.0, null, -1 );
+    } else {
+      $all_zero = true;
+      $choice = array();
+      for( $i = 0; $i < $this->dimension; $i++ ) {
+        if ( $coords[ $i ] > 0 ) {
+          $choice[] = 1;
+          $all_zero = false;
+        } else {
+          $choice[] = 0;
+        }
+      }
 
-    $all_zero = true;
-    $choice = array();
-    for( $i = 0; $i < $this->dimension; $i++ ) {
-      if ( $coords[ $i ] > 0 ) {
-        $choice[] = 1;
-        $all_zero = false;
+      // gib false zurück, falls alle vorderen Koordinaten 0 sind
+      if ( $all_zero ) {
+        $this->current_bs_point->add_value( $this->infinite );
       } else {
-        $choice[] = 0;
+        // Rück-Referenz auf Gesamtregel für alle vorderen Koordinaten > 0 um 1 verringert
+        $added_index = $this->coords_to_index( $this->add_coords( $coords, $this->get_add_coords( $choice, 1 ) ) );
+        $retval = $this->freespace[ $added_index ]->get_mainvalue();
+        if ( $retval < $this->infinite ) {
+          $this->current_bs_point->add_value( $retval, null, $added_index );
+        } else {
+          $this->current_bs_point->add_value( $this->infinite );
+        }
       }
     }
-
-    // gib false zurück, falls alle vorderen Koordinaten 0 sind
-    if ( $all_zero ) {
-      return $this->infinite;
-    }
-
-    // Rück-Referenz auf Gesamtregel für alle vorderen Koordinaten > 0 um 1 verringert
-    $added_index = $this->coords_to_index( $this->add_coords( $coords, $this->get_add_coords( $choice, 1 ) ) );
-    return $this->process_back_reference( $this->freespace[ $added_index ]->get_mainvalue(), $added_index );
   }
 
   protected function rule_2( $coords, $rule_counter = 0 ) {
     // Fehlerrückgabe: rule_counter beginnt immer bei 1
     if ( $rule_counter == 0 ) {
-      return $this->infinite;
-    }
+      $this->current_bs_point->add_value( $this->infinite );
+    } else {
+      // gib false zurück, falls aktuelle Koordinate 0 oder alle anderen vorderen Koordinaten 0
+      $choice = $this->make_binary( $rule_counter, $this->dimension );
+      $others = false;
+      $done = false;
+      foreach ( $choice as $key => $value ) {
+        if ( $value == 1 && $coords[ $key ] == 0 ) {
+          $this->current_bs_point->add_value( $this->infinite );
+          $done = true;
+          break;
+        } elseif ( $value == 0 && $coords[ $key ] > 0 ) {
+          $others = true;
+        }
+      }
+      if ( ! $done ) {
+        if ( ! $others ) {
+          $this->current_bs_point->add_value( $this->infinite );
+        } else {
 
-    // gib false zurück, falls aktuelle Koordinate 0 oder alle anderen vorderen Koordinaten 0
-    $choice = $this->make_binary( $rule_counter, $this->dimension );
-    $others = false;
-    foreach ( $choice as $key => $value ) {
-      if ( $value == 1 && $coords[ $key ] == 0 ) {
-        return $this->infinite;
-      } elseif ( $value == 0 && $coords[ $key ] > 0 ) {
-        $others = true;
+          $add_coords = $this->get_add_coords( $choice, 2 );
+
+          $added_index = $this->coords_to_index( $this->add_coords( $coords, $add_coords ) );
+
+          $values_to_compare = array();
+
+          // Rück-Referenz auf Regel 2 an derselben Stelle
+          $values_to_compare[] = $this->freespace[ $added_index ]->get_value_at( $this->get_rule_index( $rule_counter, 2 ) );
+
+          // Rück-Referenzen auf Regel 3/4 für alle Stellen 0 der Binärzahl
+          foreach ( $choice as $key => $value ) {
+            if ( $value == 0 ) {
+              $subcounter = $this->make_decimal( $this->strip_choice_index( $key, $choice ) );
+              $values_to_compare[] = $this->freespace[ $added_index ]->get_value_at( $this->get_rule_index( $key + 1, 4, $subcounter ) );
+            }
+          }
+          
+          // gib Minimalwert aus Rück-Referenzen zurück
+          $retval = min( $values_to_compare );
+          if ( $retval < $this->infinite ) {
+            $this->current_bs_point->add_value( $retval, null, $added_index );
+          } else {
+            $this->current_bs_point->add_value( $this->infinite );
+          }
+        }
       }
     }
-    if ( ! $others ) {
-      return $this->infinite;
-    }
-
-    $add_coords = $this->get_add_coords( $choice, 2 );
-
-    $added_index = $this->coords_to_index( $this->add_coords( $coords, $add_coords ) );
-
-    $values_to_compare = array();
-
-    // Rück-Referenz auf Regel 2 an derselben Stelle
-    $values_to_compare[] = $this->process_back_reference( $this->freespace[ $added_index ]->get_value_at( $this->get_rule_index( $rule_counter, 2 ) ), $added_index );
-
-    // Rück-Referenzen auf Regel 3/4 für alle Stellen 0 der Binärzahl
-    foreach ( $choice as $key => $value ) {
-      if ( $value == 0 ) {
-        $subcounter = $this->make_decimal( $this->strip_choice_index( $key, $choice ) );
-        $values_to_compare[] = $this->process_back_reference( $this->freespace[ $added_index ]->get_value_at( $this->get_rule_index( $key + 1, 4, $subcounter ) ), $added_index );
-      }
-    }
-    
-    // gib Minimalwert aus Rück-Referenzen zurück
-    return min( $values_to_compare );
   }
 
   protected function rule_3( $coords, $rule_counter = 0 ) {
     // Fehlerrückgabe: rule_counter beginnt immer bei 1
     if ( $rule_counter == 0 ) {
-      return $this->infinite;
-    }
+      $this->current_bs_point->add_value( $this->infinite );
+    } else {
+      // gib false zurück, falls aktuelle Koordinate 0
+      if ( $coords[ $rule_counter - 1 ] == 0 ) {
+        $this->current_bs_point->add_value( $this->infinite );
+      } else {
+        // gib false zurück, falls eine der hinteren Koordinaten 0
+        $done = false;
+        for ( $i = $this->dimension; $i < $this->dimension * 2; $i++ ) {
+          if ( $coords[ $i ] == 0 ) {
+            $this->current_bs_point->add_value( $this->infinite );
+            $done = true;
+            break;
+          }
+        }
 
-    // gib false zurück, falls aktuelle Koordinate 0
-    if ( $coords[ $rule_counter - 1 ] == 0 ) {
-      return $this->infinite;
-    }
+        if ( ! $done ) {
+          $values_to_compare = array();
 
-    // gib false zurück, falls eine der hinteren Koordinaten 0
-    for ( $i = $this->dimension; $i < $this->dimension * 2; $i++ ) {
-      if ( $coords[ $i ] == 0 ) {
-        return $this->infinite;
+          // gib false zurück, falls einer der Distanzvergleiche mit Epsilon false ergibt
+          $current_point = $this->trajectories[ $rule_counter - 1 ]->get_point( $coords[ $rule_counter - 1 ] - 1 );
+          for ( $x = 0; $x < $this->dimension; $x++ ) {
+            $point = $this->trajectories[ $x ]->get_point( $coords[ $x + $this->dimension ] - 1 );
+            $values_to_compare[] = $this->calc_distance( $point->get_pos(), $current_point->get_pos() );
+          }
+
+          $min_val = $this->infinite;
+          $min_index = -1;
+
+          // Rück-Referenzen auf Regeln 1 und 3 an derselben Stelle für alle Binärkombinationen > 0
+          $choices = $this->get_binary_choices( 0, intval( pow( 2, $this->dimension ) - 1 ), $this->dimension );
+          foreach ( $choices as $choice ) {
+            $added_index = $this->coords_to_index( $this->add_coords( $coords, $this->get_add_coords( $choice, 3 ) ) );
+            $retval = $this->freespace[ $added_index ]->get_value_at( $this->get_rule_index( 1, 1 ) );
+            if ( $retval < $min_val ) {
+              $min_val = $retval;
+              $min_index = $added_index;
+            }
+            $retval = $this->freespace[ $added_index ]->get_value_at( $this->get_rule_index( $rule_counter, 3 ) );
+            if ( $retval < $min_val ) {
+              $min_val = $retval;
+              $min_index = $added_index;
+            }
+          }
+
+          $values_to_compare[] = $min_val;
+
+          // gib Maximalwert aus Rück-Referenzen zurück
+          $retval = max( $values_to_compare );
+          $this->current_bs_point->add_value( $retval, $current_point, $min_index );
+        }
       }
     }
-
-    $values_to_compare = array();
-
-    // gib false zurück, falls einer der Distanzvergleiche mit Epsilon false ergibt
-    $current_point = $this->trajectories[ $rule_counter - 1 ]->get_point( $coords[ $rule_counter - 1 ] - 1 );
-    for ( $x = 0; $x < $this->dimension; $x++ ) {
-      $point = $this->trajectories[ $x ]->get_point( $coords[ $x + $this->dimension ] - 1 );
-      $values_to_compare[] = $this->process_distance( $this->calc_distance( $point->get_pos(), $current_point->get_pos() ), $point );
-    }
-
-    $subvalues_to_compare = array();
-
-    // Rück-Referenzen auf Regeln 1 und 3 an derselben Stelle für alle Binärkombinationen > 0
-    $choices = $this->get_binary_choices( 0, intval( pow( 2, $this->dimension ) - 1 ), $this->dimension );
-    foreach ( $choices as $choice ) {
-      $added_index = $this->coords_to_index( $this->add_coords( $coords, $this->get_add_coords( $choice, 3 ) ) );
-      $subvalues_to_compare[] = $this->process_back_reference( $this->freespace[ $added_index ]->get_value_at( $this->get_rule_index( 1, 1 ) ), $added_index );
-      $subvalues_to_compare[] = $this->process_back_reference( $this->freespace[ $added_index ]->get_value_at( $this->get_rule_index( $rule_counter, 3 ) ), $added_index );
-    }
-
-    $values_to_compare[] = min( $subvalues_to_compare );
-
-    // gib Maximalwert aus Rück-Referenzen zurück
-    return max( $values_to_compare );
   }
 
   protected function rule_4( $coords, $rule_counter = 0, $inner_rule_counter = 0 ) {
     // Fehlerrückgabe: rule_counter beginnt immer bei 1
     if ( $rule_counter == 0 ) {
-      return $this->infinite;
-    }
+      $this->current_bs_point->add_value( $this->infinite );
+    } else {
+      // gib false zurück, falls aktuelle Koordinate 0
+      if ( $coords[ $rule_counter - 1 ] == 0 ) {
+        $this->current_bs_point->add_value( $this->infinite );
+      } else {
+        // gib false zurück, falls eine der hinteren Koordinaten 0
+        $done = false;
+        for ( $i = $this->dimension; $i < $this->dimension * 2; $i++ ) {
+          if ( $coords[ $i ] == 0 ) {
+            $this->current_bs_point->add_value( $this->infinite );
+            $done = true;
+            break;
+          }
+        }
 
-    // gib false zurück, falls aktuelle Koordinate 0
-    if ( $coords[ $rule_counter - 1 ] == 0 ) {
-      return $this->infinite;
-    }
+        if ( ! $done ) {
+          // gib false zurück, falls eine der vorderen Koordinaten 0 und die entsprechende hintere Koordinate 1
+          for( $i = 0; $i < $this->dimension; $i++ ) {
+            if ( $coords[ $i ] == 0 && $coords[ $i + $this->dimension ] == 1 ) {
+              $this->current_bs_point->add_value( $this->infinite );
+              $done = true;
+              break;
+            }
+          }
 
-    // gib false zurück, falls eine der hinteren Koordinaten 0
-    for ( $i = $this->dimension; $i < $this->dimension * 2; $i++ ) {
-      if ( $coords[ $i ] == 0 ) {
-        return $this->infinite;
+          if ( ! $done ) {
+            $values_to_compare = array();
+
+            // gib false zurück, falls einer der Distanzvergleiche mit Epsilon false ergibt
+            $current_point = $this->trajectories[ $rule_counter - 1 ]->get_point( $coords[ $rule_counter - 1 ] - 1 );
+            for ( $x = 0; $x < $this->dimension; $x++ ) {
+              $point = $this->trajectories[ $x ]->get_point( $coords[ $x + $this->dimension ] - 1 );
+              $values_to_compare[] = $this->calc_distance( $point->get_pos(), $current_point->get_pos() );
+            }
+
+            $min_val = $this->infinite;
+            $min_index = -1;
+
+            $inner_rule_counter_binary = $this->make_binary( $inner_rule_counter, $this->dimension - 1 );
+
+            $choices = $this->get_binary_choices( 0, intval( pow( 2, $this->dimension ) - 1 ), $this->dimension );
+
+            foreach ( $choices as $choice ) {
+              $added_index = $this->coords_to_index( $this->add_coords( $coords, $this->get_add_coords( $choice, 4 ) ) );
+
+              // Rück-Referenz auf Regel 2
+              $rule_2_index = $this->make_decimal( $this->insert_choice_index( $rule_counter - 1, $inner_rule_counter_binary ) );
+              $retval = $this->freespace[ $added_index ]->get_value_at( $this->get_rule_index( $rule_2_index, 2 ) );
+              if ( $retval < $min_val ) {
+                $min_val = $retval;
+                $min_index = $added_index;
+              }
+
+              // Rück-Referenzen auf Regel 3/4 für alle Stellen 1 der Binärzahl
+              foreach ( $inner_rule_counter_binary as $key => $value ) {
+                if ( $value == 1 ) {
+                  $subcounter = 0;
+                  if ( $rule_counter - 1 > $key ) {
+                    $subcounter = $this->make_decimal( $this->strip_choice_index( $key, $this->insert_choice_index( $rule_counter - 1, $inner_rule_counter_binary ) ) );
+                  } else {
+                    $subcounter = $this->make_decimal( $this->insert_choice_index( $rule_counter - 1, $this->strip_choice_index( $key, $inner_rule_counter_binary ) ) );
+                  }
+                  if ( $subcounter == 0 ) {
+                    $retval = $this->freespace[ $added_index ]->get_value_at( $this->get_rule_index( $key + 1, 3 ) );
+                  } else {
+                    $retval = $this->freespace[ $added_index ]->get_value_at( $this->get_rule_index( $key + 1, 4, $subcounter ) );
+                  }
+                  if ( $retval < $min_val ) {
+                    $min_val = $retval;
+                    $min_index = $added_index;
+                  }
+                }
+              }
+            }
+
+            // Rück-Referenzen auf Regel 4 an derselben Stelle für jeweils eine der hinteren Stellen -1 gesetzt
+            for ( $i = 0; $i < $this->dimension; $i++ ) {
+              $added_index = $this->coords_to_index( $this->add_coords( $coords, $this->get_add_coords( $this->make_binary( intval( pow( 2, $i ) ), $this->dimension ), 4 ) ) );
+              $retval = $this->freespace[ $added_index ]->get_value_at( $this->get_rule_index( $rule_counter, 4, $inner_rule_counter ) );
+              if ( $retval < $min_val ) {
+                $min_val = $retval;
+                $min_index = $added_index;
+              }
+            }
+
+            $values_to_compare[] = $min_val;
+
+            // gib Maximalwert aus Rück-Referenzen zurück
+            $retval = max( $values_to_compare );
+            $this->current_bs_point->add_value( $retval, $current_point, $min_index );
+          }
+        }
       }
     }
-
-    // gib false zurück, falls eine der vorderen Koordinaten 0 und die entsprechende hintere Koordinate 1
-    for( $i = 0; $i < $this->dimension; $i++ ) {
-      if ( $coords[ $i ] == 0 && $coords[ $i + $this->dimension ] == 1 ) {
-        return $this->infinite;
-      }
-    }
-
-    $values_to_compare = array();
-
-    // gib false zurück, falls einer der Distanzvergleiche mit Epsilon false ergibt
-    $current_point = $this->trajectories[ $rule_counter - 1 ]->get_point( $coords[ $rule_counter - 1 ] - 1 );
-    for ( $x = 0; $x < $this->dimension; $x++ ) {
-      $point = $this->trajectories[ $x ]->get_point( $coords[ $x + $this->dimension ] - 1 );
-      $values_to_compare[] = $this->process_distance( $this->calc_distance( $point->get_pos(), $current_point->get_pos() ), $point );
-    }
-
-    $subvalues_to_compare = array();
-
-    $add_coords = $this->get_add_coords( $this->make_binary( 0, $this->dimension ), 4 );
-
-    $added_index = $this->coords_to_index( $this->add_coords( $coords, $add_coords ) );
-
-    $choice = $this->make_binary( $inner_rule_counter, $this->dimension - 1 );
-
-    // Rück-Referenz auf Regel 2
-    $rule_2_index = $this->make_decimal( $this->insert_choice_index( $rule_counter - 1, $choice ) );
-    $subvalues_to_compare[] = $this->process_back_reference( $this->freespace[ $added_index ]->get_value_at( $this->get_rule_index( $rule_2_index, 2 ) ), $added_index );
-
-    // Rück-Referenzen auf Regel 3/4 für alle Stellen 1 der Binärzahl
-    foreach ( $choice as $key => $value ) {
-      if ( $value == 1 ) {
-        $subcounter = 0;
-        if ( $rule_counter - 1 > $key ) {
-          $subcounter = $this->make_decimal( $this->strip_choice_index( $key, $this->insert_choice_index( $rule_counter - 1, $choice ) ) );
-        } else {
-          $subcounter = $this->make_decimal( $this->insert_choice_index( $rule_counter - 1, $this->strip_choice_index( $key, $choice ) ) );
-        }
-        if ( $subcounter == 0 ) {
-          $subvalues_to_compare[] = $this->process_back_reference( $this->freespace[ $added_index ]->get_value_at( $this->get_rule_index( $key + 1, 3 ) ), $added_index );
-        } else {
-          $subvalues_to_compare[] = $this->process_back_reference( $this->freespace[ $added_index ]->get_value_at( $this->get_rule_index( $key + 1, 4, $subcounter ) ), $added_index );
-        }
-      }
-    }
-
-    // Rück-Referenzen auf Regel 4 an derselben Stelle für jeweils eine der hinteren Stellen -1 gesetzt
-    for ( $i = 0; $i < $this->dimension; $i++ ) {
-      $added_index = $this->coords_to_index( $this->add_coords( $coords, $this->get_add_coords( $this->make_binary( intval( pow( 2, $i ) ), $this->dimension ), 4 ) ) );
-      $subvalues_to_compare[] = $this->process_back_reference( $this->freespace[ $added_index ]->get_value_at( $this->get_rule_index( $rule_counter, 4, $inner_rule_counter ) ), $added_index );
-    }
-
-    $values_to_compare[] = min( $subvalues_to_compare );
-
-    // gib Maximalwert aus Rück-Referenzen zurück
-    return max( $values_to_compare );
-  }
-
-  protected function process_back_reference( $value, $index ) {
-    if ( $value < $this->infinite ) {
-      /*$coords = $this->index_to_coords( $index );
-      for ( $i = 0; $i < $this->dimension; $i++ ) {
-        if ( $coords[ $i ] < 1 ) {
-          return $value;
-        }
-      }
-      for ( $i = $this->dimension; $i < $this->dimension * 2; $i++ ) {
-        if ( $coords[ $i ] != $this->trajectories[ $i - $this->dimension ]->get_length() ) {
-          return $value;
-        }
-      }*/
-      $this->current_bs_point->set_previous( $index );
-    }
-    return $value;
-  }
-
-  protected function process_distance( $distance, $point ) {
-    $this->current_bs_point->set_center_point( $point, $distance );
-    return $distance;
   }
 
   protected function get_rule_index( $rule_counter, $rule = 0, $inner_rule_counter = 0 ) {

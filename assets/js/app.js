@@ -300,6 +300,11 @@ jQuery( document ).ready(function($) {
                 break;
               case 'ordered':
                 output += '<h3>Path</h3>';
+                output += '<p class="lead">Middle Curve:';
+                for ( var p in data.middle_curve ) {
+                  output += ' &rarr; <strong>' + data.middle_curve[ p ].trajectory_name + '<sub>' + ( data.middle_curve[ p ].index + 1 ) + '</sub></strong>';
+                }
+                output += '</p>';
                 output += '<p class="lead">Epsilon: <strong>' + data.epsilon + '</strong></p>';
                 output += '<table class="table table-bordered table-hover table-responsive">';
                 output += '<thead><tr><th>#</th><th>Boolspace Point</th><th>Center Point</th><th>Center Point Coords</th><th>Mainvalue</th></tr></thead>';
@@ -337,6 +342,11 @@ jQuery( document ).ready(function($) {
               case 'discrete':
               default:
                 output += '<h3>Path</h3>';
+                output += '<p class="lead">Middle Curve:';
+                for ( var p in data.middle_curve ) {
+                  output += ' &rarr; <strong>' + data.middle_curve[ p ].trajectory_name + '<sub>' + ( data.middle_curve[ p ].index + 1 ) + '</sub></strong>';
+                }
+                output += '</p>';
                 output += '<p class="lead">Epsilon: <strong>' + data.epsilon + '</strong></p>';
                 output += '<table class="table table-bordered table-hover table-responsive">';
                 output += '<thead><tr><th>#</th><th>Freespace Point</th><th>Center Point</th><th>Center Point Coords</th><th>Center Distance</th></tr></thead>';

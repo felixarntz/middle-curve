@@ -12,10 +12,12 @@ class Algorithm extends \Studienprojekt\Base\Algorithm {
     $path = $this->find_path();
 
     $this->results = array(
-      'freespace'   => array(),
-      'path'        => array(),
-      'epsilon'     => $this->find_epsilon( $path ),
+      'freespace'     => array(),
+      'path'          => array(),
+      'epsilon'       => $this->find_epsilon( $path ),
+      'middle_curve'  => array_map( array( $this, 'get_point_for_output' ), $this->build_middle_curve( $path ) ),
     );
+    
     foreach ( $this->freespace as $key => $freespace_point ) {
       $this->results['freespace'][ $key ] = array(
         'coords'          => $freespace_point->get_indices(),

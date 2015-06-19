@@ -30,6 +30,21 @@ abstract class Algorithm {
     }
   }
 
+  protected function build_middle_curve( $path ) {
+    $middle_curve = array();
+
+    foreach ( $path as $pathpoint ) {
+      $point = $pathpoint->get_center_point();
+      if ( $point !== null ) {
+        if ( count( $middle_curve ) == 0 || $point->get_index() != $middle_curve[ count( $middle_curve ) - 1 ]->get_index() || $point->get_trajectory_index() != $middle_curve[ count( $middle_curve ) - 1 ]->get_trajectory_index() ) {
+          $middle_curve[] = $point;
+        }
+      }
+    }
+
+    return $middle_curve;
+  }
+
   protected function coords_to_index( $coords ) {
     $real_dimension = $this->make_real_dimension();
     if ( count( $coords ) !== $real_dimension ) {
