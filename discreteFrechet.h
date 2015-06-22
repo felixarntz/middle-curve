@@ -143,6 +143,22 @@ public:
 		}
 	}
 
+	vector<FS_Point<T>> getPath() {
+		vector<FS_Point<T>> path;
+		FS_Point<T> * temp = m_result;
+		while (true){
+
+			path.push_back(*temp);
+
+			if (!temp->get_has_next()){
+				break;
+			}
+
+			temp = temp->get_next();
+		}
+		return path;
+	}
+
 	FS_Point<T> getResult(){
 		return m_result;
 	}

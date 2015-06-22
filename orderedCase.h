@@ -108,19 +108,7 @@ protected:
 		for (int i = 0; i < choice.size(); i++){
 			if (choice[i] == 0){
 				int subcounter = make_decimal(strip_choice_index(i, choice));
-
-				if (subcounter == 0){ //TO-DO  Zugriff auf regel 3? Oder gar kein zugriff?
-
-					values_to_compare.push_back(m_boolspace[added_index].get_value_at(get_rule_index(i+1, 3)));
-				}
-				else{
-					values_to_compare.push_back(m_boolspace[added_index].get_value_at(get_rule_index(i + 1, 4, subcounter)));
-				}
-
-				/*if (subcounter > 0){ 
-					values_to_compare.push_back(m_boolspace[added_index].get_value_at(get_rule_index(i + 1, 4, subcounter)));
-				}*/
-
+				values_to_compare.push_back(m_boolspace[added_index].get_value_at(get_rule_index(i + 1, 4, subcounter)));
 			}
 		}
 
@@ -159,12 +147,13 @@ protected:
 
 		vector<double> subvalues_to_compare;
 
-		// Rück-Referenz auf Regel 1
-		subvalues_to_compare.push_back(m_boolspace[coords_to_index(add_coords(coords, get_add_coords(make_Binary(0, m_dimension), 3)))].get_value_at(get_rule_index(1, 1)));
+		// Rück-Referenz auf Regel 1 (falsch)
+		//subvalues_to_compare.push_back(m_boolspace[coords_to_index(add_coords(coords, get_add_coords(make_Binary(0, m_dimension), 3)))].get_value_at(get_rule_index(1, 1)));
 
-		// Rück-Referenzen auf Regel 3 an derselben Stelle für alle Binärkombinationen > 0
+		// Rück-Referenzen auf Regeln 1 und 3 an derselben Stelle für alle Binärkombinationen > 0
 		vector<vector<int>> choices = get_binary_choices(0, (int)pow(2, m_dimension) - 1, m_dimension);
 		for(auto choice : choices) {
+			subvalues_to_compare.push_back(m_boolspace[coords_to_index(add_coords(coords, get_add_coords(choice, 3)))].get_value_at(get_rule_index(1, 1)));
 			subvalues_to_compare.push_back(m_boolspace[coords_to_index(add_coords(coords, get_add_coords(choice, 3)))].get_value_at(get_rule_index(rule_counter, 3)));
 		}
 
@@ -444,6 +433,22 @@ public:
 
 			temp = temp->get_next();
 		}
+	}
+
+	vector<BS_Point<T>> getPath() {
+		vector<BS_Point<T>> path;
+		BS_Point<T> * temp = m_result;
+		while (true){
+
+			path.push_back(*temp);
+
+			if (!temp->get_has_next()){
+				break;
+			}
+
+			temp = temp->get_next();
+		}
+		return path;
 	}
 
 };
