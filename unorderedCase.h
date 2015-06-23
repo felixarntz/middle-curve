@@ -7,7 +7,7 @@ template<size_t T>
 class UnorderedCase : public DiscreteFrechet<T> {
 
 public:
-	UnorderedCase(vector<Trajectory<double, T>> field) : DiscreteFrechet(field){ }
+	UnorderedCase(vector<Trajectory<double, T>> field) : DiscreteFrechet<T>(field){ }
 
 	/**/
 	void fill_free_space() {

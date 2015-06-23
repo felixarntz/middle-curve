@@ -131,8 +131,6 @@ class base_algorithm{
 			m_dimension = trajectories.size();
 		}
 
-	  virtual void printResults() = 0;
-
 	  void run(){
 		  
 		  int real_dimension = make_real_dimension();
