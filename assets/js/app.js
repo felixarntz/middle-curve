@@ -296,7 +296,34 @@ jQuery( document ).ready(function($) {
             var points_output = [];
             switch ( mode ) {
               case 'restricted':
-                output += '<p class="lead">Calculations not yet implemented.</p>';
+                output += '<h3>Path</h3>';
+                output += '<p class="lead">Middle Curve:';
+                for ( var p in data.middle_curve ) {
+                  output += ' &rarr; <strong>' + data.middle_curve[ p ].trajectory_name + '<sub>' + ( data.middle_curve[ p ].index + 1 ) + '</sub></strong>';
+                }
+                output += '</p>';
+                output += '<p class="lead">Epsilon: <strong>' + data.epsilon + '</strong></p>';
+                output += '<table class="table table-bordered table-hover table-responsive">';
+                output += '<thead><tr><th>#</th><th>Xspace Point</th><th>Center Point</th><th>Center Point Coords</th></tr></thead>';
+                output += '<tbody>';
+                for ( var f in data.path ) {
+                  output += '<tr><td>' + ( parseInt( f ) + 1 ) + '</td><td>(' + data.path[ f ].coords.join( ', ' ) + ')</td><td>' + data.path[ f ].center_point.trajectory_name + '<sub>' + ( data.path[ f ].center_point.index + 1 ) + '</sub></td><td>(' + data.path[ f ].center_point.pos.x + '|' + data.path[ f ].center_point.pos.y + ')</td></tr>';
+                }
+                output += '</tbody>';
+                output += '</table>';
+                output += '<h3>X Space</h3>';
+                output += '<table class="table table-bordered table-hover table-responsive">';
+                output += '<thead><tr><th>#</th><th>Xspace Point</th><th>Center Point</th><th>Center Point Coords</th><th>Trajectory Points</th></tr></thead>';
+                output += '<tbody>';
+                for ( var i in data.xspace ) {
+                  points_output = [];
+                  for ( var p in data.xspace[ i ].points ) {
+                    points_output.push( data.xspace[ i ].points[ p ].trajectory_name + '<sub>' + ( data.xspace[ i ].points[ p ].index + 1 ) + '</sub> (' + data.xspace[ i ].points[ p ].pos.x + '|' + data.xspace[ i ].points[ p ].pos.y + ')' );
+                  }
+                  output += '<tr><td>' + ( parseInt( i ) + 1 ) + '</td><td>(' + data.xspace[ i ].coords.join( ', ' ) + ')</td><td>' + data.xspace[ i ].center_point.trajectory_name + '<sub>' + ( data.xspace[ i ].center_point.index + 1 ) + '</sub></td><td>(' + data.xspace[ i ].center_point.pos.x + '|' + data.xspace[ i ].center_point.pos.y + ')</td><td>' + points_output.join( ', ' ) + '</td></tr>';
+                }
+                output += '</tbody>';
+                output += '</table>';
                 break;
               case 'ordered':
                 output += '<h3>Path</h3>';

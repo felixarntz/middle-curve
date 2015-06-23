@@ -21,33 +21,48 @@ class Algorithm extends \Studienprojekt\Base\Algorithm {
       $this->xshape_strides[ $i ] = $this->xshape_strides[ $i - 1 ] * ( $this->trajectories[ ( $i - 1 ) % ( $this->dimension - 1 ) ]->get_length() + $add_value );
       $this->xboundaries_size *= $this->trajectories[ $i ]->get_length() + $add_value;
     }
-    
-    $this->fill_free_space();
 
-    /*$path = $this->find_path();
+    $epsilons = $this->get_possible_epsilons();
+
+    foreach ( $epsilons as $epsilon ) {
+      $this->current_epsilon = $epsilon;
+
+      $this->freespace = array();
+      $this->xboundaries = array();
+
+      $this->fill_free_space();
+
+      $last_coords = array();
+      for ( $i = 0; $i < $this->dimension; $i++ ) {
+        $last_coords[ $i ] = $this->trajectories[ $i ]->get_length();
+      }
+      if ( $this->freespace[ $this->coords_to_index( $last_coords ) ]->get_value() ) {
+        break;
+      }
+    }
+
+    $path = $this->find_path();
 
     $this->results = array(
-      'freespace'     => array(),
+      'xspace'        => array(),
       'path'          => array(),
-      'epsilon'       => $this->find_epsilon( $path ),
+      'epsilon'       => $this->current_epsilon,
       'middle_curve'  => array_map( array( $this, 'get_point_for_output' ), $this->build_middle_curve( $path ) ),
     );
     
-    foreach ( $this->freespace as $key => $freespace_point ) {
-      $this->results['freespace'][ $key ] = array(
-        'coords'          => $freespace_point->get_indices(),
-        'points'          => $this->get_points_for_output( $freespace_point->get_indices() ),
-        'center_point'    => $this->get_point_for_output( $freespace_point->get_center_point() ),
-        'center_distance' => $freespace_point->get_center_distance(),
+    foreach ( $this->freespace as $key => $xspace_point ) {
+      $this->results['xspace'][ $key ] = array(
+        'coords'          => $xspace_point->get_indices(),
+        'points'          => $this->get_points_for_output( $xspace_point->get_indices() ),
+        'center_point'    => $this->get_point_for_output( $xspace_point->get_center_point() ),
       );
     }
-    foreach ( $path as $key => $freespace_point ) {
+    foreach ( $path as $key => $xspace_point ) {
       $this->results['path'][ $key ] = array(
-        'coords'          => $freespace_point->get_indices(),
-        'center_point'    => $this->get_point_for_output( $freespace_point->get_center_point() ),
-        'center_distance' => $freespace_point->get_center_distance(),
+        'coords'          => $xspace_point->get_indices(),
+        'center_point'    => $this->get_point_for_output( $xspace_point->get_center_point() ),
       );
-    }*/
+    }
   }
 
   protected function fill_free_space() {
@@ -79,7 +94,7 @@ class Algorithm extends \Studienprojekt\Base\Algorithm {
 
           for ( $d = 0; $d < $this->dimension; $d++ ) {
             $upper_right_wedge = $this->get_upper_right_wedge( $d, $coords );
-            $this->add_upper_right_wedge( $i, $coords, $d, $upper_right_wedge );
+            $this->add_wedge( $i, $coords, $d, $upper_right_wedge, true );
           }
 
         } else {
@@ -89,8 +104,8 @@ class Algorithm extends \Studienprojekt\Base\Algorithm {
             $extended_lower_left_wedge = $this->make_extended_lower_left_wedge( $lower_left_wedge );
             if ( $this->intersects( $extended_lower_left_wedge ) ) {
               $upper_right_wedge = $this->get_upper_right_wedge( $d, $coords );
-              $this->add_lower_left_wedge( $i, $coords, $d, $lower_left_wedge );
-              $this->add_upper_right_wedge( $i, $coords, $d, $upper_right_wedge );
+              $this->add_wedge( $i, $coords, $d, $lower_left_wedge, false );
+              $this->add_wedge( $i, $coords, $d, $upper_right_wedge, true );
             }
           }
 
@@ -99,31 +114,17 @@ class Algorithm extends \Studienprojekt\Base\Algorithm {
     }
   }
 
-  protected function add_upper_right_wedge( $i, $coords, $trajectory_index, $wedge ) {
+  protected function add_wedge( $i, $coords, $trajectory_index, $wedge, $upper = false ) {
     $max_last_coord = 0;
     foreach ( $wedge as $key => $wedge_coords ) {
       $wedge_xcoords = $this->coords_to_xcoords( $wedge_coords );
       if ( $wedge_coords[ $this->dimension - 1 ] > $this->xboundaries[ $this->xcoords_to_index( $wedge_xcoords ) ] ) {
         $this->freespace[ $this->coords_to_index( $wedge_coords ) ]->enable( $this->trajectories[ $trajectory_index ]->get_point( $coords[ $trajectory_index ] ) );
-        $this->freespace[ $this->coords_to_index( $wedge_coords ) ]->set_previous( $i );
-      }
-      if ( $wedge_coords[ $this->dimension - 1 ] > $max_last_coord ) {
-        $max_last_coord = $wedge_coords[ $this->dimension - 1 ];
-      }
-    }
-    $xindex = $this->xcoords_to_index( $this->coords_to_xcoords( $coords ) );
-    if ( $max_last_coord > $this->xboundaries[ $xindex ] ) {
-      $this->xboundaries[ $xindex ] = $max_last_coord;
-    }
-  }
-
-  protected function add_lower_left_wedge( $i, $coords, $trajectory_index, $wedge ) {
-    $max_last_coord = 0;
-    foreach ( $wedge as $key => $wedge_coords ) {
-      $wedge_xcoords = $this->coords_to_xcoords( $wedge_coords );
-      if ( $wedge_coords[ $this->dimension - 1 ] > $this->xboundaries[ $this->xcoords_to_index( $wedge_xcoords ) ] ) {
-        $this->freespace[ $this->coords_to_index( $wedge_coords ) ]->enable( $this->trajectories[ $trajectory_index ]->get_point( $coords[ $trajectory_index ] ) );
-        $this->freespace[ $i ]->set_previous( $this->coords_to_index( $wedge_coords ) );
+        if ( $upper ) {
+          $this->freespace[ $this->coords_to_index( $wedge_coords ) ]->set_previous( $i );
+        } else {
+          $this->freespace[ $i ]->set_previous( $this->coords_to_index( $wedge_coords ) );
+        }
       }
       if ( $wedge_coords[ $this->dimension - 1 ] > $max_last_coord ) {
         $max_last_coord = $wedge_coords[ $this->dimension - 1 ];
@@ -276,6 +277,47 @@ class Algorithm extends \Studienprojekt\Base\Algorithm {
     return $xcoords;
   }
 
+  protected function find_path() {
+    $path = array();
+
+    $start_coords = array();
+    for ( $i = 0; $i < $this->dimension; $i++ ) {
+      $start_coords[] = $this->trajectories[ $i ]->get_length();
+    }
+    $index = $this->coords_to_index( $start_coords );
+
+    while ( $index > -1 ) {
+      $current = $this->freespace[ $index ];
+      $path[] = $current;
+      $index = $current->get_previous();
+    }
+
+    return array_reverse( $path );
+  }
+
+  protected function get_possible_epsilons() {
+    $epsilons = array();
+
+    for ( $i = 0; $i < count( $this->trajectories ); $i++ ) {
+      for ( $j = 0; $j < $this->trajectories[ $i ]->get_length(); $j++ ) {
+        for ( $k = 0; $k < count( $this->trajectories ); $k++ ) {
+          for ( $l = 0; $l < $this->trajectories[ $k ]->get_length(); $l++ ) {
+            if ( $i != $k || $j != $l ) {
+              $distance = $this->calc_distance( $this->trajectories[ $i ]->get_point( $j ), $this->trajectories[ $k ]->get_point( $l ) );
+              if ( ! in_array( $distance, $epsilons ) ) {
+                $epsilons[] = $distance;
+              }
+            }
+          }
+        }
+      }
+    }
+
+    sort( $epsilons, SORT_NUMERIC );
+
+    return $epsilons;
+  }
+
   protected function make_real_i( $i ) {
     return $i;
   }
@@ -297,6 +339,17 @@ class Algorithm extends \Studienprojekt\Base\Algorithm {
   }
 
   protected function get_point_for_output( $point ) {
+    if ( $point === null ) {
+      return array(
+        'index'           => -1,
+        'trajectory_name' => 'INVALID',
+        'pos'             => array(
+          'x'               => 0,
+          'y'               => 0,
+        ),
+        'time'            => 0,
+      );
+    }
     return array(
       'index'           => $point->get_index(),
       'trajectory_name' => $this->trajectories[ $point->get_trajectory_index() ]->get_name(),

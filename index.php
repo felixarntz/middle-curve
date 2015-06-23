@@ -32,6 +32,7 @@
               <option value="discrete">Discrete Frechet</option>
               <option value="unordered" selected>Unordered Case</option>
               <option value="ordered">Ordered Case</option>
+              <option value="restricted">Restricted Case</option>
             </select>
           </form>
           <p id="calculations-loader" class="text-center" style="display:none;">Calculations loading...</p>

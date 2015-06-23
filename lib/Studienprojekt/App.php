@@ -28,6 +28,7 @@ class App {
 
     switch ( $this->mode ) {
       case 'restricted':
+        $algorithm = new \Studienprojekt\RestrictedCase\Algorithm( $this->trajectories );
         break;
       case 'ordered':
         $algorithm = new \Studienprojekt\OrderedCase\Algorithm( $this->trajectories );

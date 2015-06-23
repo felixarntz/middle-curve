@@ -29,6 +29,8 @@ if ( isset( $_POST ) && isset( $_POST['trajectories'] ) ) {
   require_once $current_dir . '/lib/Studienprojekt/UnorderedCase/FreespacePoint.php';
   require_once $current_dir . '/lib/Studienprojekt/OrderedCase/Algorithm.php';
   require_once $current_dir . '/lib/Studienprojekt/OrderedCase/BoolspacePoint.php';
+  require_once $current_dir . '/lib/Studienprojekt/RestrictedCase/Algorithm.php';
+  require_once $current_dir . '/lib/Studienprojekt/RestrictedCase/XspacePoint.php';
 
   $app = new Studienprojekt\App( $trajectories, $mode );
 
