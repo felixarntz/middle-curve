@@ -224,6 +224,16 @@ class Algorithm extends \Studienprojekt\Base\Algorithm {
   }
 
   protected function check_distance( $coords ) {
+    for ( $i = 0; $i < count( $coords ); $i++ ) {
+      for ( $j = 0; $j < count( $coords ); $j++ ) {
+        if ( $i != $j ) {
+          $distance = $this->calc_distance( $this->trajectories[ $i ]->get_point( $coords[ $i ] )->get_pos(), $this->trajectories[ $j ]->get_point( $coords[ $j ] )->get_pos() );
+          if ( $distance > $this->current_epsilon ) {
+            return false;
+          }
+        }
+      }
+    }
     return true;
   }
 
@@ -303,7 +313,7 @@ class Algorithm extends \Studienprojekt\Base\Algorithm {
         for ( $k = 0; $k < count( $this->trajectories ); $k++ ) {
           for ( $l = 0; $l < $this->trajectories[ $k ]->get_length(); $l++ ) {
             if ( $i != $k || $j != $l ) {
-              $distance = $this->calc_distance( $this->trajectories[ $i ]->get_point( $j ), $this->trajectories[ $k ]->get_point( $l ) );
+              $distance = $this->calc_distance( $this->trajectories[ $i ]->get_point( $j )->get_pos(), $this->trajectories[ $k ]->get_point( $l )->get_pos() );
               if ( ! in_array( $distance, $epsilons ) ) {
                 $epsilons[] = $distance;
               }

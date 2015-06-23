@@ -10,7 +10,7 @@ class XspacePoint {
   protected $center_point = null;
   protected $previous = -1;
 
-  public function __construct( $indices, $infinite ) {
+  public function __construct( $indices ) {
     $this->indices = $indices;
     $this->dimension = count( $this->indices );
   }
