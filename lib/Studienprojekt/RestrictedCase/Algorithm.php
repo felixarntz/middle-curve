@@ -97,9 +97,7 @@ class Algorithm extends \Studienprojekt\Base\Algorithm {
       if ( ! $has_coord_zero ) {
         for ( $d = 0; $d < $this->dimension; $d++ ) {
           $current_point = $this->trajectories[ $d ]->get_point( $coords[ $d ] - 1 );
-          error_log( print_r( $current_point, true ) );
           if ( $this->check_distance( $current_point, $coords ) ) {
-            error_log( 'distance check ok for epsilon ' . $this->current_epsilon );
             if ( $this->freespace[ $i ]->get_value() ) {
 
               $upper_right_wedge = $this->get_upper_right_wedge( $current_point, $coords );
