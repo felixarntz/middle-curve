@@ -85,75 +85,69 @@ class Algorithm extends \Studienprojekt\Base\Algorithm {
       }
     }
 
-    $start_coords = array();
-    for ( $x = 0; $x < $this->dimension; $x++ ) {
-      $start_coords[] = 1;
-    }
-
-    $start_index = $this->coords_to_index( $start_coords );
-
-    for ( $i = $start_index; $i < $this->freespace_size; $i++ ) {
+    for ( $i = 0; $i < $this->freespace_size; $i++ ) {
       $coords = $this->index_to_coords( $i );
-      if ( $this->check_distance( $coords ) ) {
-        if ( $this->freespace[ $i ]->get_value() ) {
-
-          for ( $d = 0; $d < $this->dimension; $d++ ) {
-            $upper_right_wedge = $this->get_upper_right_wedge( $d, $coords );
-            $this->add_wedge( $i, $coords, $d, $upper_right_wedge, true );
-          }
-
-        } else {
-
-          for ( $d = 0; $d < $this->dimension; $d++ ) {
-            $lower_left_wedge = $this->get_lower_left_wedge( $d, $coords );
-            $extended_lower_left_wedge = $this->make_extended_lower_left_wedge( $lower_left_wedge );
-            if ( $this->intersects( $extended_lower_left_wedge ) ) {
-              $upper_right_wedge = $this->get_upper_right_wedge( $d, $coords );
-              $this->add_wedge( $i, $coords, $d, $lower_left_wedge, false );
-              $this->add_wedge( $i, $coords, $d, $upper_right_wedge, true );
-            }
-          }
-
+      $has_coord_zero = false;
+      for ( $d = 0; $d < $this->dimension; $d++ ) {
+        if ( $coords[ $d ] < 1 ) {
+          $has_coord_zero = true;
+          break;
         }
       }
-    }
-  }
+      if ( ! $has_coord_zero ) {
+        for ( $d = 0; $d < $this->dimension; $d++ ) {
+          $current_point = $this->trajectories[ $d ]->get_point( $coords[ $d ] - 1 );
+          error_log( print_r( $current_point, true ) );
+          if ( $this->check_distance( $current_point, $coords ) ) {
+            error_log( 'distance check ok for epsilon ' . $this->current_epsilon );
+            if ( $this->freespace[ $i ]->get_value() ) {
 
-  protected function add_wedge( $i, $coords, $trajectory_index, $wedge, $upper = false ) {
-    if ( $coords[ $trajectory_index ] > 0 ) {
-      $max_last_coord = 0;
-      foreach ( $wedge as $key => $wedge_coords ) {
-        $wedge_xcoords = $this->coords_to_xcoords( $wedge_coords );
-        if ( $wedge_coords[ $this->dimension - 1 ] > $this->xboundaries[ $this->xcoords_to_index( $wedge_xcoords ) ] ) {
-          $wedge_index = $this->coords_to_index( $wedge_coords );
-          $this->freespace[ $wedge_index ]->enable( $this->trajectories[ $trajectory_index ]->get_point( $coords[ $trajectory_index ] - 1 ) );
-          if ( $wedge_index != $i ) {
-            if ( $upper ) {
-              $this->freespace[ $wedge_index ]->set_previous( $i );
+              $upper_right_wedge = $this->get_upper_right_wedge( $current_point, $coords );
+              
+              $this->add_wedge( $coords, $current_point, $upper_right_wedge, $i );
+
             } else {
-              $this->freespace[ $i ]->set_previous( $wedge_index );
+
+              $lower_left_wedge = $this->get_lower_left_wedge( $current_point, $coords );
+              $extended_lower_left_wedge = $this->make_extended_lower_left_wedge( $lower_left_wedge );
+              $intersection = $this->intersects( $extended_lower_left_wedge );
+              if ( $intersection > -1 ) {
+                $upper_right_wedge = $this->get_upper_right_wedge( $current_point, $coords );
+                
+                $this->add_wedge( $coords, $current_point, $lower_left_wedge, $intersection );
+                $this->add_wedge( $coords, $current_point, $upper_right_wedge, $i );
+              }
+
             }
           }
         }
-        if ( $wedge_coords[ $this->dimension - 1 ] > $max_last_coord ) {
-          $max_last_coord = $wedge_coords[ $this->dimension - 1 ];
-        }
-      }
-      $xindex = $this->xcoords_to_index( $this->coords_to_xcoords( $coords ) );
-      if ( $max_last_coord > $this->xboundaries[ $xindex ] ) {
-        $this->xboundaries[ $xindex ] = $max_last_coord;
       }
     }
   }
 
-  protected function get_upper_right_wedge( $trajectory_index, $coords ) {
-    $wedge = array();
-
-    if ( $coords[ $trajectory_index ] < 1 ) {
-      return $wedge;
+  protected function add_wedge( $coords, $current_point, $wedge, $previous_index ) {
+    $max_last_coord = 0;
+    foreach ( $wedge as $key => $wedge_coords ) {
+      $wedge_xcoords = $this->coords_to_xcoords( $wedge_coords );
+      if ( $wedge_coords[ $this->dimension - 1 ] > $this->xboundaries[ $this->xcoords_to_index( $wedge_xcoords ) ] ) {
+        $wedge_index = $this->coords_to_index( $wedge_coords );
+        if ( $wedge_index != $previous_index ) {
+          $this->freespace[ $wedge_index ]->enable( $current_point );
+          $this->freespace[ $wedge_index ]->set_previous( $previous_index );
+          if ( $wedge_coords[ $this->dimension - 1 ] > $max_last_coord ) {
+            $max_last_coord = $wedge_coords[ $this->dimension - 1 ];
+          }
+        }
+      }
     }
+    $xindex = $this->xcoords_to_index( $this->coords_to_xcoords( $coords ) );
+    if ( $max_last_coord > $this->xboundaries[ $xindex ] ) {
+      $this->xboundaries[ $xindex ] = $max_last_coord;
+    }
+  }
 
-    $current_point = $this->trajectories[ $trajectory_index ]->get_point( $coords[ $trajectory_index ] - 1 );
+  protected function get_upper_right_wedge( $current_point, $coords ) {
+    $wedge = array();
 
     for ( $i = $this->coords_to_index( $coords ); $i < $this->freespace_size; $i++ ) {
       $wedge_coords = $this->index_to_coords( $i );
@@ -183,14 +177,8 @@ class Algorithm extends \Studienprojekt\Base\Algorithm {
     return $wedge;
   }
 
-  protected function get_lower_left_wedge( $trajectory_index, $coords ) {
+  protected function get_lower_left_wedge( $current_point, $coords ) {
     $wedge = array();
-
-    if ( $coords[ $trajectory_index ] < 1 ) {
-      return $wedge;
-    }
-
-    $current_point = $this->trajectories[ $trajectory_index ]->get_point( $coords[ $trajectory_index ] - 1 );
 
     for ( $i = $this->coords_to_index( $coords ); $i >= 0; $i-- ) {
       $wedge_coords = $this->index_to_coords( $i );
@@ -253,27 +241,21 @@ class Algorithm extends \Studienprojekt\Base\Algorithm {
       $wedge_xindex = $this->xcoords_to_index( $wedge_xcoords );
       $last_coord = $wedge_coords[ $this->dimension - 1 ];
       if ( $last_coord <= $this->xboundaries[ $wedge_xindex ] ) {
-        return true;
+        $wedge_xcoords[] = $this->xboundaries[ $wedge_xindex ];
+        return $this->coords_to_index( $wedge_xcoords );
       }
     }
-    return false;
+    return -1;
   }
 
-  protected function check_distance( $coords ) {
-    for ( $i = 0; $i < count( $coords ); $i++ ) {
-      for ( $j = 0; $j < count( $coords ); $j++ ) {
-        if ( $i != $j ) {
-          if ( $coords[ $i ] < 1 || $coords[ $j ] < 1 ) {
-            return false;
-          }
-
-          $distance = $this->calc_distance( $this->trajectories[ $i ]->get_point( $coords[ $i ] - 1 )->get_pos(), $this->trajectories[ $j ]->get_point( $coords[ $j ] - 1 )->get_pos() );
-          if ( $distance > $this->current_epsilon ) {
-            return false;
-          }
-        }
+  protected function check_distance( $current_point, $coords ) {
+    for ( $d = 0; $d < count( $coords ); $d++ ) {
+      $point = $this->trajectories[ $d ]->get_point( $coords[ $d ] - 1 );
+      if ( $this->calc_distance( $current_point->get_pos(), $point->get_pos() ) > $this->current_epsilon ) {
+        return false;
       }
     }
+
     return true;
   }
 
