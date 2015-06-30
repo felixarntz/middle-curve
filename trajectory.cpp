@@ -17,7 +17,7 @@ int main (int argc, char** argv) {
 	//CSV_Reader<3> reader;
 
 	//DiscreteFrechet<2> un(reader.read("\Bsp_1.csv", delim));
-	DiscreteFrechet<2> un(reader.read("\Bsp_2.csv", delim));
+	///DiscreteFrechet<2> un(reader.read("\Bsp_2.csv", delim));
 	//DiscreteFrechet<2> un(reader.read("\Bsp_3.csv", delim));
 
 	//UnorderedCase<2> un(reader.read("\Bsp_1.csv", delim));
@@ -26,7 +26,7 @@ int main (int argc, char** argv) {
 	//UnorderedCase<3> un(reader.read("\Bsp_3D.csv", delim));
 
 	//OrderedCase<2> un(reader.read("\Bsp_1.csv", delim));
-	//OrderedCase<2> un(reader.read("\Bsp_2.csv", delim));
+	OrderedCase<2> un(reader.read("\Bsp_2.csv", delim));
 	//OrderedCase<2> un(reader.read("\Bsp_3.csv", delim));
 
 	//RestrictedCase<2> un(reader.read("\Bsp_1.csv", delim));

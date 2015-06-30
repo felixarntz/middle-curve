@@ -18,6 +18,7 @@ protected:
 	using base_algorithm<T>::m_freespace_size;
 	using base_algorithm<T>::m_shape_strides;
 
+	using DiscreteFrechet<T>::m_freespace;
 
 public:
 	UnorderedCase(vector<Trajectory<double, T>> field) : DiscreteFrechet<T>(field){ }

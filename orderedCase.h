@@ -19,6 +19,9 @@ protected:
 	using base_algorithm<T>::index_to_coords;
 	using base_algorithm<T>::add_coords;
 
+	using base_algorithm<T>::make_Binary;
+	using base_algorithm<T>::make_decimal;
+
 	using base_algorithm<T>::m_dimension;
 	using base_algorithm<T>::m_trajectories;
 	using base_algorithm<T>::m_freespace_size;
