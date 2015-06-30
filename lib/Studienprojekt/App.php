@@ -26,6 +26,8 @@ class App {
 
     $algorithm = null;
 
+    $start = microtime( true );
+
     switch ( $this->mode ) {
       case 'restricted':
         $algorithm = new \Studienprojekt\RestrictedCase\Algorithm( $this->trajectories );
@@ -44,7 +46,12 @@ class App {
 
     if ( $algorithm !== null ) {
       $algorithm->run();
+
       $results = $algorithm->get_results();
+
+      $end = microtime( true );
+
+      $results['milliseconds'] = $end - $start;
     }
 
     return $results;
