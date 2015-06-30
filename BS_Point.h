@@ -23,7 +23,12 @@ protected:
 	bool m_has_next = false;
 
 public:
-	BS_Point(vector<int> coords) : base_point(coords){
+	using base_point<T>::get_dimension;
+	using base_point<T>::get_indices;
+	using base_point<T>::m_indices;
+
+
+	BS_Point(vector<int> coords) : base_point<T>(coords){
 		m_dimension = (int)(coords.size() / 2);
 	}
 

@@ -22,7 +22,12 @@ protected:
 	bool m_check = false;
 	
 public:
-	RS_Point(vector<int> coords) : base_point(coords){
+	using base_point<T>::get_dimension;
+	using base_point<T>::get_indices;
+	using base_point<T>::m_indices;
+
+
+	RS_Point(vector<int> coords) : base_point<T>(coords){
 		m_dimension = (int)(coords.size() / 2);
 	}
 

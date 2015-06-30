@@ -12,7 +12,6 @@ template<size_t T>
 class FS_Point :public base_point<T>{
 
 protected:
-
 	double m_center_distance = 1000000.0;
 	TrajectoryObs<double, T> m_center_point;
 
@@ -24,7 +23,11 @@ protected:
 	bool m_visited = false;
 
 public:
-	FS_Point(vector<int> coords) :base_point<T>(coords){}
+	using base_point<T>::get_dimension;
+	using base_point<T>::get_indices;
+	using base_point<T>::m_indices;
+
+	FS_Point(vector<int> coords) : base_point<T>(coords){}
 
 	void set_center_point(TrajectoryObs<double, T> point, double distance) {
 		if (distance < m_center_distance){

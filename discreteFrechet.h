@@ -18,6 +18,16 @@ template<size_t T>
 class DiscreteFrechet : public base_algorithm<T> {
 
 protected:
+	using base_algorithm<T>::calc_distance;
+	using base_algorithm<T>::get_binary_choices;
+	using base_algorithm<T>::coords_to_index;
+	using base_algorithm<T>::index_to_coords;
+	using base_algorithm<T>::add_coords;
+
+	using base_algorithm<T>::m_dimension;
+	using base_algorithm<T>::m_trajectories;
+	using base_algorithm<T>::m_freespace_size;
+	using base_algorithm<T>::m_shape_strides;
 
 	vector<vector<int>> m_choices;
 	FS_Point<T> * m_result = nullptr;
@@ -45,7 +55,7 @@ protected:
 				for (int k = 0; k < m_dimension; k++) {
 					if (k != j) {
 						TrajectoryObs<double, T> point = m_trajectories[k][coords[k]];
-						double temp_Distance = base_algorithm::calc_distance(point.pos, current_point.pos);
+						double temp_Distance = calc_distance(point.pos, current_point.pos);
 						if (temp_Distance > max_distance) {
 							max_distance = temp_Distance;
 						}
@@ -60,7 +70,7 @@ public:
 	DiscreteFrechet(vector<Trajectory<double, T>> trajectories) :base_algorithm<T>(trajectories){ }
 
 	void run(){
-		base_algorithm::run();
+		base_algorithm<T>::run();
 		m_choices = get_binary_choices(1, (int)pow(2, m_dimension), m_dimension);
 		fill_free_space();
 		m_result = find_path();

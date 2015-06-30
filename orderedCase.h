@@ -13,6 +13,18 @@ template<size_t T>
 class OrderedCase : base_algorithm<T> {
 
 protected:
+	using base_algorithm<T>::calc_distance;
+	using base_algorithm<T>::get_binary_choices;
+	using base_algorithm<T>::coords_to_index;
+	using base_algorithm<T>::index_to_coords;
+	using base_algorithm<T>::add_coords;
+
+	using base_algorithm<T>::m_dimension;
+	using base_algorithm<T>::m_trajectories;
+	using base_algorithm<T>::m_freespace_size;
+	using base_algorithm<T>::m_shape_strides;
+
+
 	vector<BS_Point<T>> m_boolspace;
 	BS_Point<T> * m_result = nullptr;
 	vector<vector<int>> m_choices;
@@ -400,10 +412,10 @@ protected:
 	}
 
 public:
-	OrderedCase(vector<Trajectory<double, T>> trajectories) : base_algorithm(trajectories){}
+	OrderedCase(vector<Trajectory<double, T>> trajectories) : base_algorithm<T>(trajectories){}
 
 	void run(){
-		base_algorithm::run();
+		base_algorithm<T>::run();
 		m_choices = get_binary_choices(1, (int)pow(2, m_dimension), m_dimension);
 		fill_bool_space();
 		m_result = find_path();

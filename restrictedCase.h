@@ -9,6 +9,18 @@ template<size_t T>
 class RestrictedCase : public base_algorithm<T>{
 	
 protected:
+	using base_algorithm<T>::calc_distance;
+	using base_algorithm<T>::get_binary_choices;
+	using base_algorithm<T>::coords_to_index;
+	using base_algorithm<T>::index_to_coords;
+	using base_algorithm<T>::add_coords;
+
+	using base_algorithm<T>::m_dimension;
+	using base_algorithm<T>::m_trajectories;
+	using base_algorithm<T>::m_freespace_size;
+	using base_algorithm<T>::m_shape_strides;
+
+
 	//Attribute
 	vector<RS_Point<T>> m_space;
 	vector<double> xboundaries;
@@ -18,9 +30,10 @@ protected:
 	double m_epsilon = 0.0;
 
 	void fill_space(){
+		
 		xboundaries.erase(xboundaries.begin(), xboundaries.end());
 		m_space.erase(m_space.begin(), m_space.end());
-
+		
 		for (int i = 0; i < m_freespace_size; i++){
 			vector<int> coords = index_to_coords(i);
 			m_space.push_back(RS_Point<T>(coords));
@@ -30,7 +43,7 @@ protected:
 				m_space[0].set_center(-1);
 			}
 		}
-
+		
 		for (int i = 0; i < xboundaries_size; i++){
 			if (i == 0){
 				xboundaries.push_back(0.0);
@@ -45,6 +58,7 @@ protected:
 			start_coords.push_back(1);
 		}
 
+		
 		for (int i = coords_to_index(start_coords); i < m_freespace_size; i++){
 
 			vector<int> coords = index_to_coords(i);
@@ -215,7 +229,7 @@ protected:
 		
 		for (int i = 0; i < coords.size(); i++){
 			for (int j = 0; j < coords.size(); j++){
-				double temp_Distance = base_algorithm::calc_distance(m_trajectories[i][coords[i]].pos, m_trajectories[j][coords[j]].pos);
+				double temp_Distance = calc_distance(m_trajectories[i][coords[i]].pos, m_trajectories[j][coords[j]].pos);
 				if (temp_Distance > m_epsilon){
 					return false;
 				}
@@ -277,7 +291,7 @@ protected:
 				for (int i = 0; i < m_trajectories[a].size(); i++){
 					for (int j = 0; j < m_trajectories[b].size(); j++){
 						if (a != b || i != j){
-							double temp_Distance = base_algorithm::calc_distance(m_trajectories[a][i].pos, m_trajectories[b][j].pos);
+							double temp_Distance = calc_distance(m_trajectories[a][i].pos, m_trajectories[b][j].pos);
 							epList.insert(pair<int, int>(temp_Distance, 0));
 						}
 					}
@@ -287,7 +301,7 @@ protected:
 
 		vector<double> keys;
 		
-		for (map<double, int>::iterator it = m.begin(); it != m.end(); ++it) {
+		for (map<double, int>::iterator it = epList.begin(); it != epList.end(); ++it) {
 			keys.push_back(it->first);
 		}
 		
@@ -296,25 +310,31 @@ protected:
 
 public:
 	//Konstruktor
-	RestrictedCase(vector<Trajectory<double, T>> trajectories) : base_algorithm(trajectories){ }
+	RestrictedCase(vector<Trajectory<double, T>> trajectories) : base_algorithm<T>(trajectories){ }
 
 	//Methoden
 	void run(){
-		base_algorithm::run();
+		base_algorithm<T>::run();
+
+		cout << "1" << endl;
 
 		int add_value = make_add_value();
 
 		xshape_strides.push_back(1);
 		xboundaries_size = m_trajectories[0].size() + add_value;
 		
+		cout << "2" << endl;
+
 		for (int i = 1; i < m_dimension-1; i++) {
 			xshape_strides.push_back(xshape_strides[i - 1] * (m_trajectories[modulo(i - 1, m_dimension-1)].size() + add_value));
 			xboundaries_size *= m_trajectories[i].size() + add_value;
 		}
 
+		cout << "3" << endl;
+
 		vector<double> epsilons = get_epsilon_list();
 		for (int i = 0; i < epsilons.size(); i++){
-			m_epsilon = epsilon[i];
+			m_epsilon = epsilons[i];
 			
 			fill_space();
 
