@@ -41,8 +41,6 @@ class Algorithm extends \Studienprojekt\Base\Algorithm {
       }
     }
 
-
-
     $path = $this->find_path();
 
     $this->results = array(
@@ -94,34 +92,23 @@ class Algorithm extends \Studienprojekt\Base\Algorithm {
 
     $start_index = $this->coords_to_index( $start_coords );
 
-    error_log( 'Durchlauf für Epsilon ' . $this->current_epsilon );
-
     for ( $i = $start_index; $i < $this->freespace_size; $i++ ) {
       $coords = $this->index_to_coords( $i );
-      error_log( print_r( $coords, true ) );
       if ( $this->check_distance( $coords ) ) {
-        error_log( 'distance check ok' );
         if ( $this->freespace[ $i ]->get_value() ) {
-          error_log( 'xvalue is true' );
 
           for ( $d = 0; $d < $this->dimension; $d++ ) {
             $upper_right_wedge = $this->get_upper_right_wedge( $d, $coords );
-            error_log( 'upper right wedge added for trajectory ' . $d . ': ' . print_r( $upper_right_wedge, true ) );
             $this->add_wedge( $i, $coords, $d, $upper_right_wedge, true );
           }
 
         } else {
-          error_log( 'xvalue is false' );
 
           for ( $d = 0; $d < $this->dimension; $d++ ) {
             $lower_left_wedge = $this->get_lower_left_wedge( $d, $coords );
             $extended_lower_left_wedge = $this->make_extended_lower_left_wedge( $lower_left_wedge );
-            error_log( 'extended lower left wedge for trajectory ' . $d . ': ' . print_r( $extended_lower_left_wedge, true ) );
             if ( $this->intersects( $extended_lower_left_wedge ) ) {
-              error_log( 'extended lower left wedge intersect check ok' );
               $upper_right_wedge = $this->get_upper_right_wedge( $d, $coords );
-              error_log( 'upper right wedge added for trajectory ' . $d . ': ' . print_r( $upper_right_wedge, true ) );
-              error_log( 'lower left wedge added for trajectory ' . $d . ': ' . print_r( $lower_left_wedge, true ) );
               $this->add_wedge( $i, $coords, $d, $lower_left_wedge, false );
               $this->add_wedge( $i, $coords, $d, $upper_right_wedge, true );
             }
@@ -130,8 +117,6 @@ class Algorithm extends \Studienprojekt\Base\Algorithm {
         }
       }
     }
-
-    error_log( 'Xspace für Epsilon ' . $this->current_epsilon . ': ' . print_r( $this->freespace, true ) );
   }
 
   protected function add_wedge( $i, $coords, $trajectory_index, $wedge, $upper = false ) {
