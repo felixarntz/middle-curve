@@ -102,38 +102,6 @@ class Algorithm extends \Studienprojekt\Base\Algorithm {
     }
   }
 
-  /*protected function find_cheapest_path( $index, $choices ) {
-    $path = array();
-    $rest_path = array();
-
-    if ( $index == $this->freespace_size - 1 ) {
-      $this->freespace[ $index ]->set_rest_path( array(), 0.0 );
-      $this->freespace[ $index ]->set_visited();
-    } else {
-      if ( $this->freespace[ $index ]->get_visited() ) {
-        $rest_path = $this->freespace[ $index ]->get_rest_path();
-      } else {
-        $rest_path = array();
-        $cheapest = 1000000000.0;
-        foreach ( $choices as $choice ) {
-          $next_coords = $this->add_coords( $this->index_to_coords( $index ), $choice );
-          $next_index = $this->coords_to_index( $next_coords );
-          if ( $next_index > -1 ) {
-            $current_path = $this->find_cheapest_path( $next_index, $choices );
-            if ( $current_path[0]->get_cost() < $cheapest ) {
-              $rest_path = $current_path;
-              $cheapest = $current_path[0]->get_cost();
-            }
-          }
-        }
-        $this->freespace[ $index ]->set_rest_path( $rest_path, $cheapest );
-        $this->freespace[ $index ]->set_visited();
-      }
-    }
-    $path[] = $this->freespace[ $index ];
-    return array_merge( $path, $rest_path );
-  }*/
-
   protected function calc_distance( $pos1, $pos2 ) {
     return sqrt( pow( $pos1[0] - $pos2[0], 2 ) + pow( $pos1[1] - $pos2[1], 2 ) );
   }
