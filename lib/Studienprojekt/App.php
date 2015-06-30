@@ -51,7 +51,7 @@ class App {
 
       $end = microtime( true );
 
-      $results['milliseconds'] = $end - $start;
+      $results['seconds'] = $end - $start;
     }
 
     return $results;

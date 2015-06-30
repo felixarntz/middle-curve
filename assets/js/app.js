@@ -292,7 +292,7 @@ jQuery( document ).ready(function($) {
             $( '#calculations' ).html( '<p>' + response.error + '</p>' );
           } else {
             var data = response.data;
-            var output = '<hr><div class="well well-lg"><h2 class="text-center">Results <small>(calculated in ' + data.milliseconds + ' milliseconds)</small></h2>';
+            var output = '<hr><div class="well well-lg"><h2 class="text-center">Results <small>(calculated in ' + data.seconds + ' seconds)</small></h2>';
             var points_output = [];
             switch ( mode ) {
               case 'restricted':
