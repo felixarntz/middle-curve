@@ -102,7 +102,7 @@ class Algorithm extends \Studienprojekt\Base\Algorithm {
 
               $upper_right_wedge = $this->get_upper_right_wedge( $current_point, $coords );
               
-              $this->add_wedge( $coords, $current_point, $upper_right_wedge, $i );
+              $this->add_wedge( $coords, $d, $upper_right_wedge, $i );
 
             } else {
 
@@ -112,8 +112,8 @@ class Algorithm extends \Studienprojekt\Base\Algorithm {
               if ( $intersection > -1 ) {
                 $upper_right_wedge = $this->get_upper_right_wedge( $current_point, $coords );
                 
-                $this->add_wedge( $coords, $current_point, $lower_left_wedge, $intersection );
-                $this->add_wedge( $coords, $current_point, $upper_right_wedge, $i );
+                $this->add_wedge( $coords, $d, $lower_left_wedge, $intersection );
+                $this->add_wedge( $coords, $d, $upper_right_wedge, $i );
               }
 
             }
@@ -123,13 +123,14 @@ class Algorithm extends \Studienprojekt\Base\Algorithm {
     }
   }
 
-  protected function add_wedge( $coords, $current_point, $wedge, $previous_index ) {
+  protected function add_wedge( $coords, $trajectory_index, $wedge, $previous_index ) {
     $max_last_coord = 0;
     foreach ( $wedge as $key => $wedge_coords ) {
       $wedge_xcoords = $this->coords_to_xcoords( $wedge_coords );
       if ( $wedge_coords[ $this->dimension - 1 ] > $this->xboundaries[ $this->xcoords_to_index( $wedge_xcoords ) ] ) {
         $wedge_index = $this->coords_to_index( $wedge_coords );
         if ( $wedge_index != $previous_index ) {
+          $current_point = $this->trajectories[ $trajectory_index ]->get_point( $wedge_coords[ $trajectory_index ] - 1 );
           $this->freespace[ $wedge_index ]->enable( $current_point );
           $this->freespace[ $wedge_index ]->set_previous( $previous_index );
           if ( $wedge_coords[ $this->dimension - 1 ] > $max_last_coord ) {
