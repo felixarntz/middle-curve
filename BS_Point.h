@@ -14,42 +14,58 @@ class BS_Point :public base_point<T>{
 
 protected:
 	int m_dimension = 0;
-	double m_mainvalue = false;
+	double m_mainvalue = numeric_limits<float>::infinity();
 	vector<double> m_values;
 
-	BS_Point<T> * m_next = nullptr;
-	double m_cost = numeric_limits<float>::infinity();
-	bool m_visited = false;
-	bool m_has_next = false;
+	int m_previous = -1;
+	vector<int> m_previous_points;
 
+	//TrajectoryObs<double, T>* center_point = nullptr;
+	//vector<TrajectoryObs<double, T>*> center_points;
+
+	int m_tra_index = -1;
+	int m_traObs_index = -1;
+
+
+	double m_cost = numeric_limits<float>::infinity();
+	
 public:
 	using base_point<T>::get_dimension;
 	using base_point<T>::get_indices;
 	using base_point<T>::m_indices;
 
+	BS_Point() : base_point<T>(vector<int>()){
+		m_dimension = 0;
+	}
 
 	BS_Point(vector<int> coords) : base_point<T>(coords){
 		m_dimension = (int)(coords.size() / 2);
 	}
-
-	void set_values(vector<double> val){
-		m_values = val;
-		m_mainvalue = *min_element(val.begin(), val.end());
+	
+	int get_previous(){
+		return m_previous;
 	}
 
-	BS_Point<T>* get_next(){
-		return m_next;
-	}
-
-	void set_next(BS_Point<T> * point, double cost){
-		if (m_mainvalue+cost < m_cost){
-			m_next = point;
-			m_cost = m_mainvalue + cost;
-			m_has_next = true;
-		}
-		m_visited = true;
+	int get_trajectory_index(){
+		return m_tra_index;
 	}
 	
+	int get_trajectoryObs_index(){
+		return m_traObs_index;
+	}
+
+	void add_value(double value, int tra_index, int traObs_index , int point){	
+		m_values.push_back(value);
+		m_previous_points.push_back(point);
+		
+		if (value < m_mainvalue){
+			m_mainvalue = value;
+			m_tra_index = tra_index;
+			m_traObs_index = traObs_index;
+			m_previous = point;
+		}
+	}
+
 	int get_dimension(){
 		return m_dimension;
 	}
@@ -68,19 +84,5 @@ public:
 
 	double get_value_at(int i){
 		return m_values[i];
-	}
-
-	bool get_visited(){
-		return m_visited;
-	}
-
-	void make_last(){
-		m_cost = m_mainvalue;
-		m_next = nullptr;
-		m_visited = true;
-	}
-
-	bool get_has_next() {
-		return m_has_next;
 	}
 };

@@ -30,7 +30,7 @@ protected:
 	using base_algorithm<T>::m_shape_strides;
 
 	vector<vector<int>> m_choices;
-	FS_Point<T> * m_result = nullptr;
+	vector<FS_Point<T>> m_result;
 	vector<FS_Point<T>> m_freespace;
 
 	int make_real_i(int i){
@@ -76,8 +76,21 @@ public:
 		m_result = find_path();
 	}
 
-	FS_Point<T> * find_path() {
-		return find_cheapest_path(0);
+	vector<FS_Point<T>> find_path() {
+		FS_Point<T> * temp = find_cheapest_path(0);
+		vector<FS_Point<T>> path;
+
+		while (true){
+			path.push_back(*temp);
+
+			if (!temp->get_has_next()){
+				break;
+			}
+
+			temp = temp->get_next();
+		}
+
+		return  path;
 	}
 
 	FS_Point<T> * find_cheapest_path(int index) {
@@ -122,12 +135,10 @@ public:
 	void printResults() {
 		vector<int> i;
 
-		FS_Point<T> * temp = m_result;
-
-		while(true){
+		for(auto it : m_result){
 
 			cout << "(";
-			vector<int> indi = temp->get_indices();
+			vector<int> indi = it.get_indices();
 			for (int i = 0; i < indi.size(); i++){
 				cout << indi[i];
 				if (i != indi.size() - 1){
@@ -137,39 +148,17 @@ public:
 			cout << ") | CenterPoint: (";
 
 
-			for (int i = 0; i < (sizeof(temp->get_center_point().pos) / sizeof(*temp->get_center_point().pos)); i++){
-				cout << temp->get_center_point().pos[i];
-				if (i != (sizeof(temp->get_center_point().pos) / sizeof(*temp->get_center_point().pos)) - 1){
+			for (int i = 0; i < (sizeof(it.get_center_point().pos) / sizeof(*it.get_center_point().pos)); i++){
+				cout << it.get_center_point().pos[i];
+				if (i != (sizeof(it.get_center_point().pos) / sizeof(*it.get_center_point().pos)) - 1){
 					cout << ",";
 				}
 			}
-			cout << ") | CenterDistance: " << temp->get_center_distance() << endl;
-
-			if (!temp->get_has_next()){
-				break;
-			}
-			
-			temp = temp->get_next();
+			cout << ") | CenterDistance: " << it.get_center_distance() << endl;
 		}
 	}
 
-	vector<FS_Point<T>> getPath() {
-		vector<FS_Point<T>> path;
-		FS_Point<T> * temp = m_result;
-		while (true){
-
-			path.push_back(*temp);
-
-			if (!temp->get_has_next()){
-				break;
-			}
-
-			temp = temp->get_next();
-		}
-		return path;
-	}
-
-	FS_Point<T> getResult(){
+	vector<FS_Point<T>> getResult(){
 		return m_result;
 	}
 };

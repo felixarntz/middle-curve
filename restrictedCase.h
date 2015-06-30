@@ -105,6 +105,10 @@ protected:
 	vector<vector<int>> get_lower_left_wedge(int d, vector<int> coords){
 		vector<vector<int>> wedge;
 
+		if (coords[d] < 1){
+			return wedge;
+		}
+
 		TrajectoryObs<double, T> current_point = m_trajectories[d][coords[d]];
 
 		for (int i = coords_to_index(coords); i >= 0; i--){
@@ -117,7 +121,12 @@ protected:
 					break;
 				}
 
-				TrajectoryObs<double, T> point = m_trajectories[j][wedge_coords[j]];
+				if (wedge_coords[j] < 1){
+					add = false;
+					break;
+				}
+
+				TrajectoryObs<double, T> point = m_trajectories[j][wedge_coords[j]-1];
 				if (calc_distance(current_point.pos, point.pos) > m_epsilon){
 					add = false;
 					break;
@@ -135,7 +144,11 @@ protected:
 	vector<vector<int>> get_upper_right_wedge(int d, vector<int> coords){
 		vector<vector<int>> wedge;
 
-		TrajectoryObs<double, T> current_point = m_trajectories[d][coords[d]];
+		if (coords[d] < 1){
+			return wedge;
+		}
+
+		TrajectoryObs<double, T> current_point = m_trajectories[d][coords[d]-1];
 
 		for (int i = coords_to_index(coords); i < m_freespace_size; i++){
 			vector<int> wedge_coords = index_to_coords(i);
@@ -147,7 +160,12 @@ protected:
 					break;
 				}
 
-				TrajectoryObs<double, T> point = m_trajectories[j][wedge_coords[j]];
+				if (wedge_coords[j] < 1){
+					add = false;
+					break;
+				}
+
+				TrajectoryObs<double, T> point = m_trajectories[j][wedge_coords[j]-1];
 				if (calc_distance(current_point.pos, point.pos) > m_epsilon){
 					add = false;
 					break;
@@ -229,7 +247,12 @@ protected:
 		
 		for (int i = 0; i < coords.size(); i++){
 			for (int j = 0; j < coords.size(); j++){
-				double temp_Distance = calc_distance(m_trajectories[i][coords[i]].pos, m_trajectories[j][coords[j]].pos);
+
+				if (coords[i] < 1 || coords[j] < 1){
+					return false;
+				}
+
+				double temp_Distance = calc_distance(m_trajectories[i][coords[i]-1].pos, m_trajectories[j][coords[j]-1].pos);
 				if (temp_Distance > m_epsilon){
 					return false;
 				}
