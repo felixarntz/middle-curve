@@ -100,8 +100,7 @@ class Algorithm extends \Studienprojekt\Base\Algorithm {
           if ( $this->check_distance( $current_point, $coords ) ) {
             if ( ! $this->freespace[ $i ]->get_value() ) {
 
-              $lower_left_wedge = $this->get_lower_left_wedge( $current_point, $coords );
-              $extended_lower_left_wedge = $this->make_extended_lower_left_wedge( $lower_left_wedge );
+              $extended_lower_left_wedge = $this->get_extended_lower_left_wedge( $current_point, $coords );
               $intersection = $this->intersects( $extended_lower_left_wedge );
               if ( $intersection > -1 ) {
                 $this->add_wedge( $coords, $d, array( $coords ), $intersection );
@@ -127,7 +126,7 @@ class Algorithm extends \Studienprojekt\Base\Algorithm {
       if ( $wedge_coords[ $this->dimension - 1 ] > $this->xboundaries[ $this->xcoords_to_index( $wedge_xcoords ) ] ) {
         $wedge_index = $this->coords_to_index( $wedge_coords );
         if ( $wedge_index != $previous_index ) {
-          $current_point = $this->trajectories[ $trajectory_index ]->get_point( $wedge_coords[ $trajectory_index ] - 1 );
+          $current_point = $this->trajectories[ $trajectory_index ]->get_point( $coords[ $trajectory_index ] - 1 );
           $this->freespace[ $wedge_index ]->enable( $current_point );
           $this->freespace[ $wedge_index ]->set_previous( $previous_index );
           if ( $wedge_coords[ $this->dimension - 1 ] > $max_last_coord ) {
@@ -135,10 +134,10 @@ class Algorithm extends \Studienprojekt\Base\Algorithm {
           }
         }
       }
-    }
-    $xindex = $this->xcoords_to_index( $this->coords_to_xcoords( $coords ) );
-    if ( $max_last_coord > $this->xboundaries[ $xindex ] ) {
-      $this->xboundaries[ $xindex ] = $max_last_coord;
+      $xindex = $this->xcoords_to_index( $wedge_xcoords );
+      if ( $max_last_coord > $this->xboundaries[ $xindex ] ) {
+        $this->xboundaries[ $xindex ] = $max_last_coord;
+      }
     }
   }
 
@@ -178,11 +177,10 @@ class Algorithm extends \Studienprojekt\Base\Algorithm {
         $wedge[] = $wedge_coords;
       }
     }
-
     return $wedge;
   }
 
-  protected function get_lower_left_wedge( $current_point, $coords ) {
+  protected function get_extended_lower_left_wedge( $current_point, $coords ) {
     $wedge = array();
 
     $min_coords = $coords;
@@ -196,7 +194,6 @@ class Algorithm extends \Studienprojekt\Base\Algorithm {
         $min_coords[ $d ] = $i;
       }
     }
-
     for ( $i = $this->coords_to_index( $coords ); $i >= 0; $i-- ) {
       $wedge_coords = $this->index_to_coords( $i );
       $add = true;
@@ -206,7 +203,7 @@ class Algorithm extends \Studienprojekt\Base\Algorithm {
           break;
         }
 
-        if ( $wedge_coords[ $d ] < $min_coords[ $d ] ) {
+        if ( $wedge_coords[ $d ] < $min_coords[ $d ] - 1) {
           $add = false;
           break;
         }
@@ -214,33 +211,6 @@ class Algorithm extends \Studienprojekt\Base\Algorithm {
       if ( $add ) {
         $wedge[] = $wedge_coords;
       }
-    }
-
-    return $wedge;
-  }
-
-  protected function make_extended_lower_left_wedge( $wedge ) {
-    $lowest_coords = $wedge[ count( $wedge ) - 1 ];
-    foreach ( $wedge as $wedge_coords ) {
-      for ( $i = 0; $i < count( $wedge_coords ); $i++ ) {
-        if ( $wedge_coords[ $i ] < $lowest_coords[ $i ] ) {
-          $lowest_coords = $wedge_coords;
-          break;
-        }
-      }
-    }
-
-    $choices = $this->get_binary_choices( 1, pow( 2, $this->dimension ), $this->dimension );
-    foreach ( $choices as $choice ) {
-      $add_coords = array();
-      for( $i = 0; $i < count( $choice ); $i++ ) {
-        if ( $choice[ $i ] == 1 ) {
-          $add_coords[] = -1;
-        } else {
-          $add_coords[] = 0;
-        }
-      }
-      $wedge[] = $this->add_coords( $lowest_coords, $add_coords );
     }
 
     return $wedge;
