@@ -103,11 +103,8 @@ class Algorithm extends \Studienprojekt\Base\Algorithm {
               $lower_left_wedge = $this->get_lower_left_wedge( $current_point, $coords );
               $extended_lower_left_wedge = $this->make_extended_lower_left_wedge( $lower_left_wedge );
               $intersection = $this->intersects( $extended_lower_left_wedge );
-              if ( $intersection > -1 && $coords[ $d ] > 0 ) {
+              if ( $intersection > -1 ) {
                 $this->add_wedge( $coords, $d, array( $coords ), $intersection );
-                /*$upper_right_wedge = $this->get_upper_right_wedge( $current_point, $coords );
-                $this->add_wedge( $coords, $d, $lower_left_wedge, $intersection );
-                $this->add_wedge( $coords, $d, $upper_right_wedge, $i );*/
               }
 
             }
