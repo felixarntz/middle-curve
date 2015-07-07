@@ -9,6 +9,16 @@
 
 using namespace std;
 
+/**
+* Beschreibung: RS_Point definiert den Inhalt eines feldes im FreeSpace des Restricted-Case Algorithmus
+*
+* Autoren: Felix Arntz, Marcel Stepien, Dennis Pawlowski
+*
+* Datum: 05.07.2015
+*
+* Basierend auf einem Wissenschaftlichen Arbeit der Ruhr-Universität Bochum
+*/
+
 template<size_t T>
 class RS_Point :public base_point<T>{
 

@@ -7,6 +7,14 @@
 
 using namespace std;
 
+/**
+* Beschreibung: File reader zum einlesen der Trajectorien über csv datein
+*
+* Autoren: Felix Arntz, Marcel Stepien, Dennis Pawlowski
+*
+* Datum: 05.07.2015
+*/
+
 template<size_t T>
 class CSV_Reader {
 

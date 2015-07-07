@@ -4,6 +4,15 @@
 
 #include <map>
 
+/**
+* Beschreibung: Restricted-Case Algorithmus zum berechen einer Middlecurve
+*
+* Autoren: Felix Arntz, Marcel Stepien, Dennis Pawlowski
+*
+* Datum: 05.07.2015
+*
+* Basierend auf einem Wissenschaftlichen Arbeit der Ruhr-Universität Bochum
+*/
 
 template<size_t T>
 class RestrictedCase : public base_algorithm<T>{
@@ -371,6 +380,17 @@ public:
 				break;
 			}
 		}
+	}
+
+	vector<TrajectoryObs<double, T>> getMiddleCurve(){
+		vector<TrajectoryObs<double, T>> temp;
+
+		for (auto it : m_result){
+			TrajectoryObs<double, T> obs = it.get_center_point();
+			temp.push_back(obs);
+		}
+
+		return temp;
 	}
 
 };

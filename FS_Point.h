@@ -8,6 +8,16 @@
 
 using namespace std;
 
+/**
+* Beschreibung: FS_Point definiert den Inhalt eines feldes im FreeSpace des Unordered-Case und des DiskretFrechet Algorithmus
+*
+* Autoren: Felix Arntz, Marcel Stepien, Dennis Pawlowski
+*
+* Datum: 05.07.2015
+*
+* Basierend auf einem Wissenschaftlichen Arbeit der Ruhr-Universität Bochum
+*/
+
 template<size_t T>
 class FS_Point :public base_point<T>{
 

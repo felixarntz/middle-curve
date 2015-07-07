@@ -7,6 +7,16 @@
 
 using namespace std;
 
+/**
+* Beschreibung: Abstracte Basis-klasse für die Algorithmen
+*
+* Autoren: Felix Arntz, Marcel Stepien, Dennis Pawlowski
+*
+* Datum: 05.07.2015
+*
+* Basierend auf einem Wissenschaftlichen Arbeit der Ruhr-Universität Bochum
+*/
+
 template <size_t T>
 class base_algorithm{
 	protected:

@@ -10,7 +10,13 @@
 #include "trajectory.h"
 #include "base_algorithm.h"
 
-/*discreteFrechet Class Header*/
+/**
+* Beschreibung: Diskret-Frechet Algorithmus als basis für die den UnorderedCase Algorithmus
+*
+* Autoren: Felix Arntz, Marcel Stepien, Dennis Pawlowski
+*
+* Datum: 05.07.2015
+*/
 
 using namespace std;
 
@@ -160,5 +166,16 @@ public:
 
 	vector<FS_Point<T>> getResult(){
 		return m_result;
+	}
+
+	vector<TrajectoryObs<double, T>> getMiddleCurve(){
+		vector<TrajectoryObs<double, T>> temp;
+
+		for (auto it : m_result){
+			TrajectoryObs<double, T> obs = it.get_center_point();
+			temp.push_back(obs);
+		}
+
+		return temp;
 	}
 };

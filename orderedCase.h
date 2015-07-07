@@ -9,10 +9,21 @@
 
 using namespace std;
 
+/**
+ * Beschreibung: Ordered-Case Algorithmus zum berechen einer Middlecurve 
+ *
+ * Autoren: Felix Arntz, Marcel Stepien, Dennis Pawlowski
+ *
+ * Datum: 05.07.2015
+ *
+ * Basierend auf einem Wissenschaftlichen Arbeit der Ruhr-Universität Bochum
+ */
+
 template<size_t T>
 class OrderedCase : base_algorithm<T> {
 
 protected:
+	//Funktionen und Variablen werden aus der Super-Klasse registriert
 	using base_algorithm<T>::calc_distance;
 	using base_algorithm<T>::get_binary_choices;
 	using base_algorithm<T>::coords_to_index;
@@ -34,6 +45,10 @@ protected:
 
 	BS_Point<T> current_bs_point;
 
+	/**
+	 *Diese Funktion fuehrt den Algorithmus aus und erstellt den datensatz 
+	 *fuer das rauslesen der Middlecurve.
+	 */
 	void fill_bool_space(){
 		
 		for (int i = 0; i < m_freespace_size; i++){
@@ -41,24 +56,23 @@ protected:
 			vector<int> coords = index_to_coords(i);
 			current_bs_point = BS_Point<T>(coords);
 
-
-			//Regel 1 (1 Boolvalue)
+			//Zugriff auf Regel 1 (1 Boolvalue)
 			rule_1(coords);
 
 
-			//Regel 2 (2^k -2 Boolvalues)
+			//Zugriff auf Regel 2 (2^k -2 Boolvalues)
 			for (int j = 1; j <= (int)(pow(2, m_dimension) - 2); j++) {
 				rule_2(coords, j);
 			}
 
 
-			//Regel 3 (k Boolvalues)
+			//Zugriff auf Regel 3 (k Boolvalues)
 			for (int j = 1; j <= m_dimension; j++) {
 				rule_3(coords, j);
 			}
 
 			
-			//Regel 4 (k*(2^(k-1)-1) Boolvalues)
+			//Zugriff auf Regel 4 (k*(2^(k-1)-1) Boolvalues)
 			for (int j = 1; j <= m_dimension; j++) {
 				for (int k = 1; k <= (int)(pow(2, m_dimension - 1) - 1); k++){
 					rule_4(coords, j, k);
@@ -69,6 +83,9 @@ protected:
 		}
 	}
 
+	/**
+	*Regel 1
+	*/
 	void rule_1(vector<int> coords){
 		//gib true, falls alle Koordinaten 0 sind
 		if (coords_to_index(coords)==0){
@@ -106,6 +123,9 @@ protected:
 		}
 	}
 
+	/**
+	*Regel 2
+	*/
 	void rule_2(vector<int> coords, int rule_counter){
 		//Fehlerrückgabe: rule_counter beginnt immer bei 1
 		if (rule_counter == 0){
@@ -162,6 +182,9 @@ protected:
 		}
 	}
 
+	/**
+	*Regel 3
+	*/
 	void rule_3(vector<int> coords, int rule_counter){
 		// Fehlerrückgabe: rule_counter beginnt immer bei 1
 		if (rule_counter == 0) {
@@ -233,6 +256,9 @@ protected:
 		}
 	}
 
+	/**
+	*Regel 4
+	*/
 	void rule_4(vector<int> coords, int rule_counter, int inner_rule_counter){
 		// Fehlerrückgabe: rule_counter beginnt immer bei 1
 		if (rule_counter == 0) {
@@ -357,7 +383,7 @@ protected:
 		}
 	}
 
-	
+	//Berechnet den index für die eingegebene Regel
 	int get_rule_index(int rule_counter, int rule = 0, int inner_rule_counter = 0){
 		if (rule < 1 || rule > 4){
 			return -1;
@@ -385,6 +411,7 @@ protected:
 		return 1;
 	}
 
+	//Fuegt einen Index in die Auswahl hinein und gibt diese zurück
 	vector<int> insert_choice_index(int index, vector<int> choice){
 		vector<int> new_choice;
 		if (index == choice.size()){
@@ -402,6 +429,7 @@ protected:
 		return new_choice;
 	}
 
+	//Entfernt einen Index aus einer auswahlmenge
 	vector<int> strip_choice_index(int index, vector<int> choice){
 		vector<int> new_choice;
 		
@@ -414,7 +442,7 @@ protected:
 		return new_choice;
 	}
 	
-
+	//erstellt einen Vector mit Binaerer Auswahlmene -1 oder 0
 	vector<int> get_add_coords(vector<int> binaryChoice, int rule){
 		vector<int> output;
 
@@ -471,8 +499,12 @@ protected:
 	}
 
 public:
+	//Konstruktor - Verlangt zur eingabe eine Menge an Trajectoren
 	OrderedCase<T>(vector<Trajectory<double, T>> trajectories) : base_algorithm<T>(trajectories){}
 
+	/**
+	*Fürt den Algorithmus aus
+	*/
 	void run(){
 		base_algorithm<T>::run();
 		m_choices = get_binary_choices(1, (int)pow(2, m_dimension), m_dimension);
@@ -480,6 +512,9 @@ public:
 		m_result = find_path();
 	}
 
+	/**
+	*Gibt den Pfad an BS_Points zurück, welche die Middlecurve beinhaltet
+	*/
 	vector<BS_Point<T>> find_path() {
 		vector<BS_Point<T>> path;
 		
@@ -497,12 +532,6 @@ public:
 		while (true){
 			path.push_back(temp);
 
-			/*
-			
-			AUSGABE FUNKTIONIERT NOCH NICHT!
-			
-			*/
-
 			if (!(temp.get_previous() > -1)){
 				//cout << (*temp).get_mainvalue() << endl;
 				break;
@@ -516,7 +545,9 @@ public:
 		return path;
 	}
 
-	//Ausgabe
+	/**
+	*Ausgabe in der Console
+	*/
 	void printResults() {
 		vector<int> i;
 
@@ -553,7 +584,28 @@ public:
 		}
 	}
 
+	/**
+	*Gibt den zufor errechneten Vector an BS_Point Objekten zurück
+	*/
 	vector<BS_Point<T>> getResult(){
 		return m_result;
+	}
+
+	/**
+	*Gibt die aus der Errechnung resultierende Middlecurve zurück
+	*/
+	vector<TrajectoryObs<double, T>> getMiddleCurve(){
+		vector<TrajectoryObs<double, T>> temp;
+
+		for (auto it : m_result){
+			if (it.get_trajectory_index() != -1 && it.get_trajectoryObs_index() != -1){
+
+				TrajectoryObs<double, T> obs = m_trajectories[it.get_trajectory_index()][it.get_trajectoryObs_index()];
+				temp.push_back(obs);
+			}
+
+		}
+
+		return temp;
 	}
 };
