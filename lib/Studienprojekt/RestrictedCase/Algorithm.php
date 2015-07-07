@@ -98,23 +98,23 @@ class Algorithm extends \Studienprojekt\Base\Algorithm {
         for ( $d = 0; $d < $this->dimension; $d++ ) {
           $current_point = $this->trajectories[ $d ]->get_point( $coords[ $d ] - 1 );
           if ( $this->check_distance( $current_point, $coords ) ) {
-            if ( $this->freespace[ $i ]->get_value() ) {
-
-              $upper_right_wedge = $this->get_upper_right_wedge( $current_point, $coords );
-              
-              $this->add_wedge( $coords, $d, $upper_right_wedge, $i );
-
-            } else {
+            if ( ! $this->freespace[ $i ]->get_value() ) {
 
               $lower_left_wedge = $this->get_lower_left_wedge( $current_point, $coords );
               $extended_lower_left_wedge = $this->make_extended_lower_left_wedge( $lower_left_wedge );
               $intersection = $this->intersects( $extended_lower_left_wedge );
-              if ( $intersection > -1 ) {
-                $upper_right_wedge = $this->get_upper_right_wedge( $current_point, $coords );
-                
+              if ( $intersection > -1 && $coords[ $d ] > 0 ) {
+                $this->add_wedge( $coords, $d, array( $coords ), $intersection );
+                /*$upper_right_wedge = $this->get_upper_right_wedge( $current_point, $coords );
                 $this->add_wedge( $coords, $d, $lower_left_wedge, $intersection );
-                $this->add_wedge( $coords, $d, $upper_right_wedge, $i );
+                $this->add_wedge( $coords, $d, $upper_right_wedge, $i );*/
               }
+
+            }
+            if ( $this->freespace[ $i ]->get_value() ) {
+
+              $upper_right_wedge = $this->get_upper_right_wedge( $current_point, $coords );
+              $this->add_wedge( $coords, $d, $upper_right_wedge, $i );
 
             }
           }
@@ -148,6 +148,21 @@ class Algorithm extends \Studienprojekt\Base\Algorithm {
   protected function get_upper_right_wedge( $current_point, $coords ) {
     $wedge = array();
 
+    $max_coords = $coords;
+
+    for ( $d = 0; $d < $this->dimension; $d++ ) {
+      $trajectory = $this->trajectories[ $d ];
+      for ( $i = $coords[ $d ]; $i <= $trajectory->get_length(); $i++ ) {
+        if ( $i < 1 ) {
+          break;
+        }
+        if ( $this->calc_distance( $current_point->get_pos(), $trajectory->get_point( $i - 1 )->get_pos() ) > $this->current_epsilon ) {
+          break;
+        }
+        $max_coords[ $d ] = $i;
+      }
+    }
+
     for ( $i = $this->coords_to_index( $coords ); $i < $this->freespace_size; $i++ ) {
       $wedge_coords = $this->index_to_coords( $i );
       $add = true;
@@ -157,13 +172,7 @@ class Algorithm extends \Studienprojekt\Base\Algorithm {
           break;
         }
 
-        if ( $wedge_coords[ $d ] < 1 ) {
-          $add = false;
-          break;
-        }
-
-        $point = $this->trajectories[ $d ]->get_point( $wedge_coords[ $d ] - 1 );
-        if ( $this->calc_distance( $current_point->get_pos(), $point->get_pos() ) > $this->current_epsilon ) {
+        if ( $wedge_coords[ $d ] > $max_coords[ $d ] ) {
           $add = false;
           break;
         }
@@ -179,6 +188,18 @@ class Algorithm extends \Studienprojekt\Base\Algorithm {
   protected function get_lower_left_wedge( $current_point, $coords ) {
     $wedge = array();
 
+    $min_coords = $coords;
+
+    for ( $d = 0; $d < $this->dimension; $d++ ) {
+      $trajectory = $this->trajectories[ $d ];
+      for ( $i = $coords[ $d ]; $i > 0; $i-- ) {
+        if ( $this->calc_distance( $current_point->get_pos(), $trajectory->get_point( $i - 1 )->get_pos() ) > $this->current_epsilon ) {
+          break;
+        }
+        $min_coords[ $d ] = $i;
+      }
+    }
+
     for ( $i = $this->coords_to_index( $coords ); $i >= 0; $i-- ) {
       $wedge_coords = $this->index_to_coords( $i );
       $add = true;
@@ -188,13 +209,7 @@ class Algorithm extends \Studienprojekt\Base\Algorithm {
           break;
         }
 
-        if ( $wedge_coords[ $d ] < 1 ) {
-          $add = false;
-          break;
-        }
-
-        $point = $this->trajectories[ $d ]->get_point( $wedge_coords[ $d ] - 1 );
-        if ( $this->calc_distance( $current_point->get_pos(), $point->get_pos() ) > $this->current_epsilon ) {
+        if ( $wedge_coords[ $d ] < $min_coords[ $d ] ) {
           $add = false;
           break;
         }
