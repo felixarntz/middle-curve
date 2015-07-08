@@ -127,7 +127,7 @@ class Algorithm extends \Studienprojekt\Base\Algorithm {
       if ( $wedge_coords[ $this->dimension - 1 ] > $this->xboundaries[ $this->xcoords_to_index( $wedge_xcoords ) ] ) {
         $wedge_index = $this->coords_to_index( $wedge_coords );
         if ( $wedge_index != $previous_index ) {
-          $current_point = $this->trajectories[ $trajectory_index ]->get_point( $coords[ $trajectory_index ] - 1 );
+          $current_point = $this->trajectories[ $trajectory_index ]->get_point( $wedge_coords[ $trajectory_index ] - 1 );
           $this->freespace[ $wedge_index ]->enable( $current_point );
           $this->freespace[ $wedge_index ]->set_previous( $previous_index );
           if ( $wedge_coords[ $this->dimension - 1 ] > $max_last_coord ) {
