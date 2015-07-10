@@ -32,9 +32,10 @@ protected:
 
 	//Attribute
 	vector<RS_Point<T>> m_space;
-	vector<double> xboundaries;
+	vector<int> xboundaries;
 	int xboundaries_size = 0;
 	vector<int> xshape_strides;
+	vector<RS_Point<T>> m_result;
 
 	double m_epsilon = 0.0;
 
@@ -49,53 +50,63 @@ protected:
 			
 			if (i == 0){
 				//Erster Value wird true gesetzt
-				m_space[0].set_center(-1);
+				m_space[i].enable(-1, -1);
 			}
 		}
 		
+
 		for (int i = 0; i < xboundaries_size; i++){
 			if (i == 0){
-				xboundaries.push_back(0.0);
+				xboundaries.push_back(0);
 			}
 			else{
-				xboundaries.push_back(-1.0);
+				xboundaries.push_back(-1);
 			}
-		}
-
-		vector<int> start_coords;
-		for (int x = 0; x < m_dimension; x++){
-			start_coords.push_back(1);
 		}
 
 		
-		for (int i = coords_to_index(start_coords); i < m_freespace_size; i++){
+		for (int i = 0; i < m_freespace_size; i++){
 
 			vector<int> coords = index_to_coords(i);
+			bool has_coords_zero = false;
 
-			if (check_distance(coords)){
-				if (m_space[i].get_check()){
-
-					for (int d = 0; d < m_dimension; d++){
-						vector<vector<int>> upper_right_wedge = get_upper_right_wedge(d, coords);
-						add_wedge(i, coords, d, upper_right_wedge, true); //true := upper_right_wedge,  false := lower_left_wedge
-					}
-				}
-				else{
-
-					for (int d = 0; d < m_dimension; d++){
-						vector<vector<int>> lower_left_wedge = get_lower_left_wedge(d, coords);
-						vector<vector<int>> extended_lower_left_wedge = make_extended_lower_left_wedge(lower_left_wedge);
-
-						if (intersects(extended_lower_left_wedge)){
-							vector<vector<int>> upper_right_wedge = get_upper_right_wedge(d, coords);
-							add_wedge(i, coords, d, upper_right_wedge, true);
-							add_wedge(i, coords, d, lower_left_wedge, false);
-						}
-					}
-
+			
+			for (int j = 0; j < m_dimension; j++){
+				if (coords[j] < 1){
+					has_coords_zero = true;
+					break;
 				}
 			}
+			if (!has_coords_zero){
+				for (int d = 0; d < m_dimension; d++){
+					TrajectoryObs<double, T> current_point = m_trajectories[d][coords[d] - 1];
+					if (check_distance(current_point, coords)){
+						if (!m_space[i].get_check()){
+							
+							//vector<vector<int>> lower_left_wedge = get_lower_left_wedge(current_point, coords);
+							//vector<vector<int>> extended_lower_left_wedge = make_extended_lower_left_wedge(lower_left_wedge, coords);
+					
+							vector<vector<int>> extended_lower_left_wedge = get_extended_lower_left_wedge(current_point, coords);
 
+
+							int inter = intersects(extended_lower_left_wedge);
+
+							if (inter > -1){
+								vector<vector<int>> tempCoords;
+								tempCoords.push_back(coords);
+								add_wedge(coords, d, tempCoords, inter);
+							}
+						}
+						if (m_space[i].get_check()){
+							
+							vector<vector<int>> upper_right_wedge = get_upper_right_wedge(current_point, coords);
+							add_wedge(coords, d, upper_right_wedge, i);
+							
+						}
+
+					}
+				}
+			}
 		}
 	}
 
@@ -111,14 +122,19 @@ protected:
 		return 1;
 	}
 
-	vector<vector<int>> get_lower_left_wedge(int d, vector<int> coords){
+	vector<vector<int>> get_extended_lower_left_wedge(TrajectoryObs<double, T> current_point, vector<int> coords){
 		vector<vector<int>> wedge;
+		vector<int> min_coords = coords;
 
-		if (coords[d] < 1){
-			return wedge;
+
+		for (int d = 0; d < m_dimension; d++){
+			for (int i = coords[d]; i > 0; i--){
+				if (calc_distance(current_point.pos, m_trajectories[d][i-1].pos) > m_epsilon){
+					break;
+				}
+				min_coords[d] = i;
+			}
 		}
-
-		TrajectoryObs<double, T> current_point = m_trajectories[d][coords[d]];
 
 		for (int i = coords_to_index(coords); i >= 0; i--){
 			vector<int> wedge_coords = index_to_coords(i);
@@ -130,17 +146,10 @@ protected:
 					break;
 				}
 
-				if (wedge_coords[j] < 1){
+				if (wedge_coords[j] < (min_coords[j] - 1)){
 					add = false;
 					break;
 				}
-
-				TrajectoryObs<double, T> point = m_trajectories[j][wedge_coords[j]-1];
-				if (calc_distance(current_point.pos, point.pos) > m_epsilon){
-					add = false;
-					break;
-				}
-
 			}
 
 			if (add){
@@ -150,15 +159,29 @@ protected:
 		return wedge;
 	}
 
-	vector<vector<int>> get_upper_right_wedge(int d, vector<int> coords){
+	vector<vector<int>> get_upper_right_wedge(TrajectoryObs<double, T> current_point, vector<int> coords){
 		vector<vector<int>> wedge;
+		vector<int> max_coords = coords;
 
-		if (coords[d] < 1){
-			return wedge;
+
+		for (int d = 0; d < m_dimension; d++){
+			
+			for (int i = coords[d]; i <= m_trajectories[d].size(); i++){
+				if (i < 1){
+					break;
+				}
+
+				if (calc_distance(current_point.pos, m_trajectories[d][i - 1].pos) > m_epsilon){
+					break;
+				}
+				max_coords[d] = i;
+			}
 		}
 
-		TrajectoryObs<double, T> current_point = m_trajectories[d][coords[d]-1];
-
+		/*
+		for (int i = coords_to_index(coords); i >= 0; i--){
+		*/
+		//for (int i = coords_to_index(max_coords); i >= coords_to_index(coords); i--){
 		for (int i = coords_to_index(coords); i < m_freespace_size; i++){
 			vector<int> wedge_coords = index_to_coords(i);
 			bool add = true;
@@ -169,13 +192,7 @@ protected:
 					break;
 				}
 
-				if (wedge_coords[j] < 1){
-					add = false;
-					break;
-				}
-
-				TrajectoryObs<double, T> point = m_trajectories[j][wedge_coords[j]-1];
-				if (calc_distance(current_point.pos, point.pos) > m_epsilon){
+				if (wedge_coords[j] > max_coords[j]){
 					add = false;
 					break;
 				}
@@ -188,93 +205,65 @@ protected:
 		return wedge;
 	}
 
-	vector<vector<int>> make_extended_lower_left_wedge(vector<vector<int>> wedge){
-		
-		vector<vector<int>> extended_temp;
-		vector<int> lowest_coords = wedge[wedge.size() - 1]; //TO-DO
-
-		for (auto tWedge : wedge){
-			for (int i = 0; i < tWedge.size(); i++){
-				if (tWedge[i] < lowest_coords[i]){
-					lowest_coords = tWedge;
-					break;
-				}
-			}
-			extended_temp.push_back(tWedge);
-		}
-
-		vector<vector<int>> choices = get_binary_choices(1, pow(2, m_dimension), m_dimension);
-		for (auto choice : choices){
-			vector<int> add_c;
-
-			for (int i = 0; i < m_dimension; i++){
-				if (choice[i] == 1){
-					add_c.push_back(-1);
-				}
-				else{
-					add_c.push_back(0);
-				}
-			}
-
-			extended_temp.push_back(add_coords(lowest_coords, add_c));
-		}
-		return extended_temp;
-	}
-
-	void add_wedge(int i, vector<int> coords, int d, vector<vector<int>> wedge, bool upper){
+	void add_wedge(vector<int> coords, int trajectory_index, vector<vector<int>> wedge, int previous_index){
 		int max_last_coord = 0;
+
+		
 		for (int i = 0; i < wedge.size(); i++){
 			vector<int> wedge_xcoords = coords_to_xcoords(wedge[i]);
 			if (wedge[i][m_dimension - 1] > xboundaries[xcoords_to_index(wedge_xcoords)]){
-				m_space[coords_to_index(wedge[i])].set_center(d);
+				int wedge_index = coords_to_index(wedge[i]);
 
-				if (upper){
-					m_space[coords_to_index(wedge[i])].set_befor(&m_space[i]);
-				}
-				else{
-					m_space[i].set_befor(&m_space[coords_to_index(wedge[i])]);
+				if (wedge_index != previous_index){
+					TrajectoryObs<double, T> current_point = m_trajectories[trajectory_index][coords[trajectory_index]-1];
+
+					m_space[wedge_index].enable(trajectory_index, coords[trajectory_index]-1);
+					m_space[wedge_index].set_previous(previous_index);
+
+					if (wedge[i][m_dimension-1] > max_last_coord){
+						max_last_coord = wedge[i][m_dimension - 1];
+					}
+
 				}
 			}
-
-			if (wedge[i][m_dimension - 1] > max_last_coord){
-				max_last_coord = wedge[i][m_dimension - 1];
+			int xindex = xcoords_to_index(wedge_xcoords);
+			if (max_last_coord > xboundaries[xindex]){
+				xboundaries[xindex] = max_last_coord;
 			}
-		}
-
-		int xindex = xcoords_to_index(coords_to_xcoords(coords));
-		if (max_last_coord > xboundaries[xindex]){
-			xboundaries[xindex] = max_last_coord;
 		}
 	}
 
-	bool intersects(vector<vector<int>> wedge){
-		//TO-DO
-		return true;
-	}
-
-	bool check_distance(vector<int> coords){
+	int intersects(vector<vector<int>> wedge){
 		
-		for (int i = 0; i < coords.size(); i++){
-			for (int j = 0; j < coords.size(); j++){
+		for (int i = 0; i < wedge.size(); i++){
+			vector<int> wedge_xcoords = coords_to_xcoords(wedge[i]);
+			int wedge_xindex = xcoords_to_index(wedge_xcoords);
+			int last_coord = wedge[i][m_dimension - 1];
 
-				if (coords[i] < 1 || coords[j] < 1){
-					return false;
-				}
+			if (last_coord <= xboundaries[wedge_xindex]){
+				wedge_xcoords.push_back(xboundaries[wedge_xindex]);
+				return coords_to_index(wedge_xcoords);
+			}
+		}
+		return -1;
+	}
 
-				double temp_Distance = calc_distance(m_trajectories[i][coords[i]-1].pos, m_trajectories[j][coords[j]-1].pos);
-				if (temp_Distance > m_epsilon){
-					return false;
-				}
+	bool check_distance(TrajectoryObs<double, T> current_point, vector<int> coords){
+		
+		for (int d = 0; d < coords.size(); d++){
+			TrajectoryObs<double, T> point = m_trajectories[d][coords[d] - 1];
+
+			if (calc_distance(current_point.pos, point.pos) > m_epsilon){
+				return false;
 			}
 		}
 
 		return true;
 	}
-
 
 	vector<int> coords_to_xcoords(vector<int> coords){
 		vector<int> temp;
-		for (int i = 0; i < coords.size() - 1; i++){
+		for (int i = 0; i < m_dimension - 1; i++){
 			temp.push_back(coords[i]);
 		}
 		return temp;
@@ -315,7 +304,7 @@ protected:
 		return coords;
 	}
 
-	vector<double> get_epsilon_list(){
+	vector<double> get_possible_epsilon(){
 		map<double, int> epList;
 
 		for (int a = 0; a < m_trajectories.size(); a++){
@@ -324,7 +313,7 @@ protected:
 					for (int j = 0; j < m_trajectories[b].size(); j++){
 						if (a != b || i != j){
 							double temp_Distance = calc_distance(m_trajectories[a][i].pos, m_trajectories[b][j].pos);
-							epList.insert(pair<int, int>(temp_Distance, 0));
+							epList.insert(pair<double, int>(temp_Distance, 0));
 						}
 					}
 				}
@@ -340,6 +329,42 @@ protected:
 		return keys;
 	}
 
+
+	vector<RS_Point<T>> find_path() {
+		vector<RS_Point<T>> path;
+
+		vector<int> start_coord;
+
+		for (int i = 0; i < m_dimension; i++){
+			start_coord.push_back(m_trajectories[i].size());
+		}
+
+		int index = coords_to_index(start_coord);
+
+		/*RS_Point<T> temp = m_space[index];
+		while (true){
+			path.push_back(temp);
+
+			if (!(temp.get_previous() > -1)){
+				//cout << (*temp).get_mainvalue() << endl;
+				break;
+			}
+
+			temp = m_space[temp.get_previous()];
+		}*/
+
+		while (index > -1){
+			RS_Point<T> current = m_space[index];
+			path.push_back(current);
+			index = current.get_previous();
+		}
+
+		reverse(path.begin(), path.end());
+
+		return path;
+	}
+
+
 public:
 	//Konstruktor
 	RestrictedCase(vector<Trajectory<double, T>> trajectories) : base_algorithm<T>(trajectories){ }
@@ -347,24 +372,20 @@ public:
 	//Methoden
 	void run(){
 		base_algorithm<T>::run();
-
-		cout << "1" << endl;
-
+		
 		int add_value = make_add_value();
 
 		xshape_strides.push_back(1);
 		xboundaries_size = m_trajectories[0].size() + add_value;
 		
-		cout << "2" << endl;
-
 		for (int i = 1; i < m_dimension-1; i++) {
 			xshape_strides.push_back(xshape_strides[i - 1] * (m_trajectories[modulo(i - 1, m_dimension-1)].size() + add_value));
-			xboundaries_size *= m_trajectories[i].size() + add_value;
+			xboundaries_size *= (m_trajectories[i].size() + add_value);
 		}
 
-		cout << "3" << endl;
 
-		vector<double> epsilons = get_epsilon_list();
+		vector<double> epsilons = get_possible_epsilon();
+
 		for (int i = 0; i < epsilons.size(); i++){
 			m_epsilon = epsilons[i];
 			
@@ -373,24 +394,77 @@ public:
 			vector<int> last_coords;
 
 			for (int j = 0; j < m_dimension; j++){
-				last_coords.push_back(m_trajectories[i].size());
+				last_coords.push_back(m_trajectories[j].size());
 			}
 
 			if (m_space[coords_to_index(last_coords)].get_check()){
 				break;
 			}
 		}
+
+		m_result = find_path();
 	}
 
 	vector<TrajectoryObs<double, T>> getMiddleCurve(){
 		vector<TrajectoryObs<double, T>> temp;
 
 		for (auto it : m_result){
-			TrajectoryObs<double, T> obs = it.get_center_point();
-			temp.push_back(obs);
-		}
+			int tra = it.get_tra();
+			int traObs = it.get_traObs();
 
+			if (tra != -1 && traObs != -1){
+
+				TrajectoryObs<double, T> obs = m_trajectories[tra][traObs];
+				temp.push_back(obs);
+			}
+
+		}
 		return temp;
 	}
 
+	double getEpsilon(){
+		return m_epsilon;
+	}
+
+	/**
+	*Ausgabe in der Console
+	*/
+	void printResults() {
+		vector<int> i;
+
+		for (auto it : m_result){
+
+			int tra = it.get_tra();
+			int traObs = it.get_traObs();
+
+			cout << "(";
+			vector<int> indi = it.get_indices();
+			for (int i = 0; i < indi.size(); i++){
+				cout << indi[i];
+				if (i != indi.size() - 1){
+					cout << ",";
+				}
+			}
+			cout << ")";
+
+
+			if (tra > -1 && traObs > -1){
+
+				TrajectoryObs<double, T> obs = m_trajectories[tra][traObs];
+				int obs_size = (sizeof(obs.pos) / sizeof(*obs.pos));
+
+				cout << " | CenterPoint: (";
+
+
+				for (int i = 0; i < obs_size; i++){
+					cout << obs.pos[i];
+					if (i != obs_size - 1){
+						cout << ",";
+					}
+				}
+				cout << ")";
+			}
+			cout << endl;
+		}
+	}
 };

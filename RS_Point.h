@@ -25,9 +25,10 @@ class RS_Point :public base_point<T>{
 protected:
 	int m_dimension = 0;
 	
-	RS_Point<T> * m_befor = nullptr;
+	int previous = -1;
 
-	int centerIndex = -1;
+	int m_tra = -1;
+	int m_traObs = -1;
 
 	bool m_check = false;
 	
@@ -41,20 +42,29 @@ public:
 		m_dimension = (int)(coords.size() / 2);
 	}
 
-	RS_Point<T> * get_befor(){
-		return m_befor;
+	int get_previous(){
+		return previous;
 	}
 
-	int get_centerIndex(){
+	/*int get_centerIndex(){
 		return centerIndex;
+	}*/
+
+	int get_tra(){
+		return m_tra;
 	}
 
-	void set_befor(RS_Point<T> * point){
-		m_befor = point;
+	int get_traObs(){
+		return m_traObs;
 	}
 
-	void set_center(int center){
-		centerIndex = center;
+	void set_previous(int point){
+		previous = point;
+	}
+
+	void enable(int tra, int traObs){
+		m_tra = tra;
+		m_traObs = traObs;
 		m_check = true;
 	}
 

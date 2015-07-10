@@ -7,20 +7,23 @@
 
 using namespace std;
 
+/*! \brief Basis-klasse fuer die Algorithmen
+ *
+ * Diese Klasse enthaelt einige funktionen die fuer die Algorithmen notwendig sind und oefter vorkommen.
+ */
+
 /**
-* Beschreibung: Abstracte Basis-klasse für die Algorithmen
 *
 * Autoren: Felix Arntz, Marcel Stepien, Dennis Pawlowski
 *
 * Datum: 05.07.2015
 *
-* Basierend auf einem Wissenschaftlichen Arbeit der Ruhr-Universität Bochum
+* Basierend auf einem Wissenschaftlichen Arbeit der Ruhr-Universitaet Bochum
 */
 
 template <size_t T>
 class base_algorithm{
 	protected:
-
 		//Attribute
 		vector<Trajectory<double, T>> m_trajectories;
 		int m_dimension = 0;
@@ -32,7 +35,6 @@ class base_algorithm{
 		virtual int make_real_i(int i) = 0;
 		virtual int make_real_dimension() = 0;
 		virtual int make_add_value() = 0;
-
 
 		//Funktionen
 		int coords_to_index(vector<int> coords) {
@@ -136,11 +138,19 @@ class base_algorithm{
 		}
 
 	public:
+		/**
+		 * Konstruktor der base_algorithm Klasse
+		 *
+		 * trajectories - ein Vector mit den Trajectory Objekten (siehe trajectory.h)
+		 */
 		base_algorithm(vector<Trajectory<double, T>> trajectories){
 			m_trajectories = trajectories;
 			m_dimension = trajectories.size();
 		}
 
+		/**
+		 * Diese funktion fuehrt die Berechnung aus und speichert das Ergebnis in den Attributen der Klasse.
+		 */
 	  void run(){
 		  
 		  int real_dimension = make_real_dimension();
@@ -158,6 +168,15 @@ class base_algorithm{
 		  }
 	  }
 
+	  /**
+	   * Berrechnet die distanz zwichen zwei Punkten
+	   *
+	   * pos1 - ein Array mit den Koordinaten des ersten Punktes
+
+	   * pos2 - ein Array mit den Koordinaten des zweiten Punktes
+	   *
+	   * pos1 und pos2 muessen die gleiche Dimension haben.
+	   */
 	  double calc_distance(double pos1[], double pos2[]) {
 		  double temp = 0.0;
 		  for (int i = 0; i < T; i++){
