@@ -94,18 +94,19 @@ private:
 	void printTest(){
 		int count = 0;
 		for (const vector<TrajectoryObs<double, T>> &a : output){
-			cout << endl << "Trajektorie " << count << endl << endl;
+			cout << endl << "Trajectorie " << count << endl << endl;
 			count++;
-			for (const TrajectoryObs<double, T> &b : a){
+			/*for (const TrajectoryObs<double, T> &b : a){
 				cout << b << endl;
-			}
+			}*/
+			cout << endl;
 		}
 	}
 
 
 public:
 
-	vector<Trajectory<double, T>> read(const string& str, char& delim){
+	int read(const string& str, char& delim){
 
 		ifstream filestream(str);
 		filestream.exceptions(ios_base::badbit);
@@ -129,20 +130,26 @@ public:
 		}
 		catch (ios_base::failure& exc){
 			cout << "badbit Error: Read error on i/o operation" << endl;
-			return vector<Trajectory<double, T>>(); //Nichts
+			return 0; //Nichts
 		}
 		catch (exception &e){
 			cout << e.what() << endl;
-			return vector<Trajectory<double, T>>(); //Nichts
+			return 0; //Nichts
 		}
 
 		insertMap();
+		cout << "File read " << endl << endl;
+
+		return 1;
+
+	}
+
+	vector<Trajectory<double, T>> getData(){
 		insertTrajectory();
-		printTest();
-		cout << "Datei eingelesen " << endl << endl;
-
+		cout << "-------------------------------------------------" << endl;
+		cout << "Print data " << endl;
+		printTest();		
 		return output;
-
 	}
 
 	void write(vector<TrajectoryObs<double, T>>& middleCurve, double& epsilon, string& path){
@@ -153,21 +160,21 @@ public:
 		try{
 			filestreamOut.open(path + "middleCurve.csv", ios_base::trunc);
 			if (T == 2){
-				filestreamOut << "\"" << "x" << "\"" << "," << "\"" << "y" << "\"" << "," << "\"" << "epsilon" << "\"" << "\n";
+				filestreamOut << "\"" << "x" << "\"" << "," << "\"" << "y" << "\"" << "," << "\"" << "index" << "\"" << "\n";
 				for (int i = 0; i < middleCurve.size(); i++){
 					TrajectoryObs<double, T> point = middleCurve[i];
-					filestreamOut << "\"" << point.pos[0] << "\"" << "," << "\"" << point.pos[1] << "\"" << "," << "\"" << epsilon << "\"" << "\n";
+					filestreamOut << "\"" << point.pos[0] << "\"" << "," << "\"" << point.pos[1] << "\"" << "," << "\"" << "index-hier" << "\"" << "\n";
 				}
 			}
 			else{//T == 3
-				filestreamOut << "\"" << "x" << "\"" << "," << "\"" << "y" << "\"" << "," << "\"" << "z" << "\"" << "," << "\"" << "epsilon" << "\"" << "\n";
+				filestreamOut << "\"" << "x" << "\"" << "," << "\"" << "y" << "\"" << "," << "\"" << "z" << "\"" << "," << "\"" << "index" << "\"" << "\n";
 				for (int i = 0; i < middleCurve.size(); i++){
 					TrajectoryObs<double, T> point = middleCurve[i];
-					filestreamOut << "\"" << point.pos[0] << "\"" << "," << "\"" << point.pos[1] << "\"" << "," << "\"" << point.pos[2] << "\"" << "," << "\"" << epsilon << "\"" << "\n";
+					filestreamOut << "\"" << point.pos[0] << "\"" << "," << "\"" << point.pos[1] << "\"" << "," << "\"" << point.pos[2] << "\"" << "," << "\"" << "index-hier" << "\"" << "\n";
 				}
 			}
-
-			cout << endl << "the file is succesful write " << endl << endl;
+			filestreamOut << "\"" << "epsilon" << "\"" << "\n" << "\"" << epsilon << "\"";
+			cout << endl << "File write " << endl << endl;
 		}
 		catch (ios_base::failure& exc){
 			cout << endl << "ERROR: directory not found" << endl;
