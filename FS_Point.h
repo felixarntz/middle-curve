@@ -39,7 +39,7 @@ protected:
 public:
 	using base_point<T>::get_dimension;
 	using base_point<T>::get_indices;
-	using base_point<T>::m_indices;
+	using base_point<T>::m_indices; 
 
 	/**
 	* Konstruktor des BS_Point Objekts

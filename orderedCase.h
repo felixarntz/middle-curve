@@ -538,7 +538,7 @@ public:
 		vector<int> i;
 
 		for (auto it : m_result){
-			if (it.get_trajectory_index() != -1 && it.get_trajectoryObs_index() != -1){
+			if (it.get_centerIndex() != -1 && it.get_trajectoryObs_index() != -1){
 
 				int tra_ind = it.get_trajectory_index();
 				int traObs_ind = it.get_trajectoryObs_index();
@@ -585,10 +585,8 @@ public:
 
 		for (auto it : m_result){
 			if (it.get_trajectory_index() != -1 && it.get_trajectoryObs_index() != -1){
-				int tra_ind = it.get_trajectory_index();
-				int traObs_ind = it.get_trajectoryObs_index();
 
-				TrajectoryObs<double, T> obs = m_trajectories[tra_ind][traObs_ind];
+				TrajectoryObs<double, T> obs = m_trajectories[it.get_trajectory_index()][it.get_trajectoryObs_index()-1];
 				temp.push_back(obs);
 			}
 
