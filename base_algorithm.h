@@ -10,6 +10,7 @@ using namespace std;
 /*! \brief Basis-klasse fuer die Algorithmen
  *
  * Diese Klasse enthaelt einige funktionen die fuer die Algorithmen notwendig sind und oefter vorkommen.
+ *
  */
 
 /**
@@ -18,7 +19,7 @@ using namespace std;
 *
 * Datum: 05.07.2015
 *
-* Basierend auf einem Wissenschaftlichen Arbeit der Ruhr-Universitaet Bochum
+* Basierend auf einer Wissenschaftlichen Arbeit der Ruhr-Universitaet Bochum
 */
 
 template <size_t T>
@@ -172,7 +173,7 @@ class base_algorithm{
 	   * Berrechnet die distanz zwichen zwei Punkten
 	   *
 	   * pos1 - ein Array mit den Koordinaten des ersten Punktes
-
+	   *
 	   * pos2 - ein Array mit den Koordinaten des zweiten Punktes
 	   *
 	   * pos1 und pos2 muessen die gleiche Dimension haben.

@@ -8,14 +8,19 @@
 
 using namespace std;
 
+/*! \brief FS_Point definiert den Inhalt eines feldes im FreeSpace des Unordered-Case und des DiskretFrechet Algorithmus
+*
+* FS_Point ist ein Punktcontainer mit den errechneten Koordinaten des TrajectoryObs und ihrer Distanz zu den umliegenden Punkten.
+*
+*/
+
 /**
-* Beschreibung: FS_Point definiert den Inhalt eines feldes im FreeSpace des Unordered-Case und des DiskretFrechet Algorithmus
 *
 * Autoren: Felix Arntz, Marcel Stepien, Dennis Pawlowski
 *
 * Datum: 05.07.2015
 *
-* Basierend auf einem Wissenschaftlichen Arbeit der Ruhr-Universität Bochum
+* Basierend auf einer Wissenschaftlichen Arbeit der Ruhr-Universitaet Bochum
 */
 
 template<size_t T>
@@ -27,7 +32,6 @@ protected:
 
 	double m_cost = 1000000.0;
 	FS_Point<T> * m_next;
-	//vector<FS_Point<T>> m_rest_path;  //B Speicherplatz
 
 	bool m_has_next = false;
 	bool m_visited = false;
@@ -37,6 +41,11 @@ public:
 	using base_point<T>::get_indices;
 	using base_point<T>::m_indices;
 
+	/**
+	* Konstruktor des BS_Point Objekts
+	*
+	* coords - die Koordinaten des BS_Points im FreeSpace
+	*/
 	FS_Point(vector<int> coords) : base_point<T>(coords){}
 
 	void set_center_point(TrajectoryObs<double, T> point, double distance) {

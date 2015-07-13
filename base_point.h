@@ -8,6 +8,7 @@ using namespace std;
 /*! \brief Basis-klasse fuer die Punktobjekte des FreeSpace
  * 
  * Diese Klasse enhaelt funktionen und Attribute die von allen Punktobjekten benoetigt werden.
+ *
  */
 
 /**
@@ -16,7 +17,7 @@ using namespace std;
 *
 * Datum: 05.07.2015
 *
-* Basierend auf einem Wissenschaftlichen Arbeit der Ruhr-Universitaet Bochum
+* Basierend auf einer Wissenschaftlichen Arbeit der Ruhr-Universitaet Bochum
 */
 
 template<size_t t>

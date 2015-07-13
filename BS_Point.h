@@ -12,14 +12,16 @@ using namespace std;
 /*! \brief BS_Point definiert den Inhalt eines feldes im FreeSpace des Ordered-Case Algorithmus
  * 
  * BS_Point ist ein Punktcontainer mit den errechneten Koordinaten des TrajectoryObs und ihrer Distanz zu den umliegenden Punkten.
+ *
  */
 
 /**
-* Autoren - Felix Arntz, Marcel Stepien, Dennis Pawlowski
 *
-* Datum - 05.07.2015
+* Autoren: Felix Arntz, Marcel Stepien, Dennis Pawlowski
 *
-* Basierend auf einem Wissenschaftlichen Arbeit der Ruhr-Universitaet Bochum
+* Datum: 05.07.2015
+*
+* Basierend auf einer Wissenschaftlichen Arbeit der Ruhr-Universitaet Bochum
 */
 
 template<size_t T>
@@ -94,6 +96,9 @@ public:
 		}
 	}
 
+	/**
+	* return - die Dimension der Koordinaten
+	*/
 	int get_dimension(){
 		return m_dimension;
 	}

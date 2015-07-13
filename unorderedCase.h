@@ -3,14 +3,19 @@
 #include "FS_Point.h"
 #include "discreteFrechet.h"
 
+/*! \brief Unordered-Case Algorithmus zum berechen einer Middlecurve
+*
+* Berechnet die Mittelkurve anhand des UnorderedCase Algorithmus.
+*
+*/
+
 /**
-* Beschreibung: Unordered-Case Algorithmus zum berechen einer Middlecurve
 *
 * Autoren: Felix Arntz, Marcel Stepien, Dennis Pawlowski
 *
 * Datum: 05.07.2015
 *
-* Basierend auf einem Wissenschaftlichen Arbeit der Ruhr-Universität Bochum
+* Basierend auf einer Wissenschaftlichen Arbeit der Ruhr-Universitaet Bochum
 */
 
 template<size_t T>
@@ -30,10 +35,6 @@ protected:
 
 	using DiscreteFrechet<T>::m_freespace;
 
-public:
-	UnorderedCase(vector<Trajectory<double, T>> field) : DiscreteFrechet<T>(field){ }
-
-	/**/
 	void fill_free_space() {
 
 		for (int i = 0; i < m_freespace_size; i++) {
@@ -59,4 +60,12 @@ public:
 			}
 		}
 	}
+
+public:
+	/**
+	* Konstruktor der UnorderedCase Klasse
+	*
+	* trajectories - ein Vector mit den Trajectory Objekten (siehe trajectory.h)
+	*/
+	UnorderedCase(vector<Trajectory<double, T>> trajectories) : DiscreteFrechet<T>(trajectories){ }
 };

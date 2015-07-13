@@ -4,14 +4,19 @@
 
 #include <map>
 
+/*! \brief Restricted-Case Algorithmus zum berechen einer Middlecurve
+*
+* Berechnet die Mittelkurve anhand des RestrictedCase Algortihmus.
+*
+*/
+
 /**
-* Beschreibung: Restricted-Case Algorithmus zum berechen einer Middlecurve
 *
 * Autoren: Felix Arntz, Marcel Stepien, Dennis Pawlowski
 *
 * Datum: 05.07.2015
 *
-* Basierend auf einem Wissenschaftlichen Arbeit der Ruhr-Universität Bochum
+* Basierend auf einer Wissenschaftlichen Arbeit der Ruhr-Universitaet Bochum
 */
 
 template<size_t T>
@@ -83,11 +88,7 @@ protected:
 					if (check_distance(current_point, coords)){
 						if (!m_space[i].get_check()){
 							
-							//vector<vector<int>> lower_left_wedge = get_lower_left_wedge(current_point, coords);
-							//vector<vector<int>> extended_lower_left_wedge = make_extended_lower_left_wedge(lower_left_wedge, coords);
-					
 							vector<vector<int>> extended_lower_left_wedge = get_extended_lower_left_wedge(current_point, coords);
-
 
 							int inter = intersects(extended_lower_left_wedge);
 
@@ -178,10 +179,6 @@ protected:
 			}
 		}
 
-		/*
-		for (int i = coords_to_index(coords); i >= 0; i--){
-		*/
-		//for (int i = coords_to_index(max_coords); i >= coords_to_index(coords); i--){
 		for (int i = coords_to_index(coords); i < m_freespace_size; i++){
 			vector<int> wedge_coords = index_to_coords(i);
 			bool add = true;
@@ -341,18 +338,6 @@ protected:
 
 		int index = coords_to_index(start_coord);
 
-		/*RS_Point<T> temp = m_space[index];
-		while (true){
-			path.push_back(temp);
-
-			if (!(temp.get_previous() > -1)){
-				//cout << (*temp).get_mainvalue() << endl;
-				break;
-			}
-
-			temp = m_space[temp.get_previous()];
-		}*/
-
 		while (index > -1){
 			RS_Point<T> current = m_space[index];
 			path.push_back(current);
@@ -366,10 +351,16 @@ protected:
 
 
 public:
-	//Konstruktor
+	/**
+	* Konstruktor der RestrictedCase Klasse
+	*
+	* trajectories - ein Vector mit den Trajectory Objekten (siehe trajectory.h)
+	*/
 	RestrictedCase(vector<Trajectory<double, T>> trajectories) : base_algorithm<T>(trajectories){ }
 
-	//Methoden
+	/**
+	* Diese funktion fuehrt die Berechnung aus und speichert das Ergebnis in den Attributen der Klasse.
+	*/
 	void run(){
 		base_algorithm<T>::run();
 		
@@ -405,29 +396,8 @@ public:
 		m_result = find_path();
 	}
 
-	vector<TrajectoryObs<double, T>> getMiddleCurve(){
-		vector<TrajectoryObs<double, T>> temp;
-
-		for (auto it : m_result){
-			int tra = it.get_tra();
-			int traObs = it.get_traObs();
-
-			if (tra != -1 && traObs != -1){
-
-				TrajectoryObs<double, T> obs = m_trajectories[tra][traObs];
-				temp.push_back(obs);
-			}
-
-		}
-		return temp;
-	}
-
-	double getEpsilon(){
-		return m_epsilon;
-	}
-
 	/**
-	*Ausgabe in der Console
+	* Gibt das errechnete Ergebnis in der Konsole aus
 	*/
 	void printResults() {
 		vector<int> i;
@@ -466,5 +436,39 @@ public:
 			}
 			cout << endl;
 		}
+	}
+
+	/**
+	* return - das Ergebnis der Berechnung als vector<FS_Point<T>> Objekt (siehe FS_Point.h)
+	*/
+	vector<RS_Point<T>> getResult(){
+		return m_result;
+	}
+
+	/**
+	* return - die errechnete Mittelkurve als vector<TrajectoryObs<double, SIZE>>
+	*/
+	vector<TrajectoryObs<double, T>> getMiddleCurve(){
+		vector<TrajectoryObs<double, T>> temp;
+
+		for (auto it : m_result){
+			int tra = it.get_tra();
+			int traObs = it.get_traObs();
+
+			if (tra != -1 && traObs != -1){
+
+				TrajectoryObs<double, T> obs = m_trajectories[tra][traObs];
+				temp.push_back(obs);
+			}
+
+		}
+		return temp;
+	}
+
+	/**
+	* return - der Epsilonwert der errechneten Mittelkurve
+	*/
+	double getEpsilon(){
+		return m_epsilon;
 	}
 };

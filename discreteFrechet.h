@@ -13,12 +13,14 @@
 /*! \brief Diskret-Frechet Algorithmus als basis für die den UnorderedCase Algorithmus
  *
  * Berechnet die Mittelkurve zwischen n Trajectory Objekten anhand des Diskret-Frechet Algorithmus.
+ *
  */
 
 /**
-* Autoren - Felix Arntz, Marcel Stepien, Dennis Pawlowski
 *
-* Datum - 05.07.2015
+* Autoren: Felix Arntz, Marcel Stepien, Dennis Pawlowski
+*
+* Datum: 05.07.2015
 */
 
 using namespace std;
@@ -75,29 +77,6 @@ protected:
 		}
 	}
 
-public:
-	/**
-	 * Konstruktor der DiskretFrechet Klasse
-	 *
-	 * trajectories - ein Vector mit den Trajectory Objekten (siehe trajectory.h)
-	 */
-	DiscreteFrechet(vector<Trajectory<double, T>> trajectories) :base_algorithm<T>(trajectories){ }
-
-	/**
-	 * Diese funktion fuehrt die Berechnung aus und speichert das Ergebnis in den Attributen der Klasse.
-	 */
-	void run(){
-		base_algorithm<T>::run();
-		m_choices = get_binary_choices(1, (int)pow(2, m_dimension), m_dimension);
-		fill_free_space();
-		m_result = find_path();
-	}
-
-	/**
-	 * Fuehrt die Suche nach dem existierenden Pfad durch. Wird von der Funktion run() automatisch aufgerufen.
-	 *
-	 * return - den Pfad als vector<FS_Point<T>> (siehe FS_Point.h)
-	 */
 	vector<FS_Point<T>> find_path() {
 		FS_Point<T> * temp = find_cheapest_path(0);
 		vector<FS_Point<T>> path;
@@ -115,11 +94,6 @@ public:
 		return  path;
 	}
 
-	/**
-	* Fuehrt die Suche nach dem existierenden günstigsten Pfad durch. 
-	*
-	* return - das anfangsobjekt als Pointer
-	*/
 	FS_Point<T> * find_cheapest_path(int index) {
 
 		if (index == m_freespace_size - 1) {
@@ -140,7 +114,7 @@ public:
 
 					if (next_index > -1) {
 						FS_Point<T> * current = find_cheapest_path(next_index);
-						
+
 						if (current->get_cost() < cheapest) {
 							next = current;
 							cheapest = current->get_cost();
@@ -154,11 +128,26 @@ public:
 		return &m_freespace[index];
 	}
 
+	int make_add_value(){
+		return 0;
+	}
+
+public:
 	/**
-	 * return - 0
+	 * Konstruktor der DiskretFrechet Klasse
+	 *
+	 * trajectories - ein Vector mit den Trajectory Objekten (siehe trajectory.h)
 	 */
-	int make_add_value(){ 
-		return 0; 
+	DiscreteFrechet(vector<Trajectory<double, T>> trajectories) :base_algorithm<T>(trajectories){ }
+
+	/**
+	 * Diese funktion fuehrt die Berechnung aus und speichert das Ergebnis in den Attributen der Klasse.
+	 */
+	void run(){
+		base_algorithm<T>::run();
+		m_choices = get_binary_choices(1, (int)pow(2, m_dimension), m_dimension);
+		fill_free_space();
+		m_result = find_path();
 	}
 
 	/**
@@ -198,7 +187,7 @@ public:
 	}
 
 	/**
-	* return - die errechnete Mittelkurve vector
+	* return - die errechnete Mittelkurve als vector<TrajectoryObs<double, SIZE>>
 	*/
 	vector<TrajectoryObs<double, T>> getMiddleCurve(){
 		vector<TrajectoryObs<double, T>> temp;

@@ -9,14 +9,19 @@
 
 using namespace std;
 
+/*! \brief RS_Point definiert den Inhalt eines feldes im FreeSpace des Restricted-Case Algorithmus
+*
+* RS_Point ist ein Punktcontainer mit den errechneten Koordinaten des TrajectoryObs und ihrer Distanz zu den umliegenden Punkten.
+*
+*/
+
 /**
-* Beschreibung: RS_Point definiert den Inhalt eines feldes im FreeSpace des Restricted-Case Algorithmus
 *
 * Autoren: Felix Arntz, Marcel Stepien, Dennis Pawlowski
 *
 * Datum: 05.07.2015
 *
-* Basierend auf einem Wissenschaftlichen Arbeit der Ruhr-Universität Bochum
+* Basierend auf einer Wissenschaftlichen Arbeit der Ruhr-Universitaet Bochum
 */
 
 template<size_t T>
@@ -37,7 +42,11 @@ public:
 	using base_point<T>::get_indices;
 	using base_point<T>::m_indices;
 
-
+	/**
+	* Konstruktor des BS_Point Objekts
+	*
+	* coords - die Koordinaten des BS_Points im FreeSpace
+	*/
 	RS_Point(vector<int> coords) : base_point<T>(coords){
 		m_dimension = (int)(coords.size() / 2);
 	}
@@ -45,10 +54,6 @@ public:
 	int get_previous(){
 		return previous;
 	}
-
-	/*int get_centerIndex(){
-		return centerIndex;
-	}*/
 
 	int get_tra(){
 		return m_tra;
