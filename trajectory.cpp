@@ -15,28 +15,23 @@ int main (int argc, char** argv) {
 	char delim = ',';
 	CSV_IO<2> reader;
 	//CSV_IO<3> reader;
+	
+	reader.read("\Bsp_1.csv", delim);
+	//reader.read("\Bsp_2.csv", delim);
+	//reader.read("\Bsp_3.csv", delim);
+	//reader.read("\Bsp_3D.csv", delim);
 
-	//DiscreteFrechet<2> un(reader.read("\Bsp_1.csv", delim));
-	//DiscreteFrechet<2> un(reader.read("\Bsp_2.csv", delim));
-	//DiscreteFrechet<2> un(reader.read("\Bsp_3.csv", delim));
+	DiscreteFrechet<2> un(reader.getData());
+	//UnorderedCase<2> un(reader.getData());
+	//OrderedCase<2> un(reader.getData());
+	//RestrictedCase<2> un(reader.getData());
 
-	//UnorderedCase<2> un(reader.read("\Bsp_1.csv", delim));
-	//UnorderedCase<2> un(reader.read("\Bsp_2.csv", delim));
-	//UnorderedCase<2> un(reader.read("\Bsp_3.csv", delim));
-	//UnorderedCase<3> un(reader.read("\Bsp_3D.csv", delim));
-
-	//OrderedCase<2> un(reader.read("\Bsp_1.csv", delim));
-	//OrderedCase<2> un(reader.read("\Bsp_2.csv", delim));
-	//OrderedCase<2> un(reader.read("\Bsp_3.csv", delim));
-	//OrderedCase<3> un(reader.read("\Bsp_3D.csv", delim));
-
-	//RestrictedCase<2> un(reader.read("\Bsp_1.csv", delim));
-    RestrictedCase<2> un(reader.read("\Bsp_2.csv", delim));
-	//RestrictedCase<2> un(reader.read("\Bsp_3.csv", delim));
-	//RestrictedCase<2> un(reader.read("\Bsp_4.csv", delim));
+	//UnorderedCase<3> un(reader.getData());
+	//OrderedCase<3> un(reader.getData());
+	//RestrictedCase<3> un(reader.getData());
 
 	un.run();
-	//un.printResults();
+	un.printResults();
 
 	string pfad = "C:\\output\\";
 	double epsilen = un.getEpsilon();
