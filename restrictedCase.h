@@ -370,7 +370,7 @@ public:
 		xboundaries_size = m_trajectories[0].size() + add_value;
 		
 		for (int i = 1; i < m_dimension-1; i++) {
-			xshape_strides.push_back(xshape_strides[i - 1] * (m_trajectories[modulo(i - 1, m_dimension-1)].size() + add_value));
+			xshape_strides.push_back(xshape_strides[i - 1] * (m_trajectories[this->modulo(i - 1, m_dimension-1)].size() + add_value));
 			xboundaries_size *= (m_trajectories[i].size() + add_value);
 		}
 

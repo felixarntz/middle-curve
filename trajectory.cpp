@@ -21,9 +21,9 @@ int main (int argc, char** argv) {
 	//reader.read("\Bsp_3.csv", delim);
 	//reader.read("\Bsp_3D.csv", delim);
 
-	DiscreteFrechet<2> un(reader.getData());
+	//DiscreteFrechet<2> un(reader.getData());
 	//UnorderedCase<2> un(reader.getData());
-	//OrderedCase<2> un(reader.getData());
+	OrderedCase<2> un(reader.getData());
 	//RestrictedCase<2> un(reader.getData());
 
 	//UnorderedCase<3> un(reader.getData());
