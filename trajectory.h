@@ -4,10 +4,13 @@
 #define __TRAJECTORY_H__
 
 #include<vector>
+#include <string>
 
 template<class T, size_t dim> struct TrajectoryObs {
 	T pos[dim];
 	T time;
+    std::string trajectoryName;
+    
 
 	// prints a string of the form (x_1, x_2, ..., x_d) t=<time>
 	friend std::ostream& operator<< (std::ostream& os, const TrajectoryObs<T, dim>& obs) {

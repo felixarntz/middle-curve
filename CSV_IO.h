@@ -7,13 +7,8 @@
 
 using namespace std;
 
-/*! \brief  File reader und writer
-*
-*  Zum einlesen und schreiben von der Trajectorien in csv Datein
-*
-*/
-
 /**
+* Beschreibung: File reader zum einlesen der Trajectorien über csv datein
 *
 * Autoren: Felix Arntz, Marcel Stepien, Dennis Pawlowski
 *
@@ -41,8 +36,8 @@ private:
 	}
 
 	double stringDoubleConverter(string wertString){
-		double number = 0.0;
-		string temp = wertString.substr(1, wertString.size() - 2);
+		long double number = 0.0;
+        string temp = wertString.substr(1, wertString.size() - 2);
 		istringstream(temp) >> number;
 		return number;
 	}
@@ -61,14 +56,15 @@ private:
 
 
 			if (T == 2){ //if wurde aus performance gruenden nach aussen ausgelagert
-				do {//Alle Werte von einem key werden ausgegeben	
-
+				do {//Alle Werte von einem key werden ausgegeben
+                    
 					tro.pos[0] = it->second;
 					++it;
 					tro.pos[1] = it->second;
 					++it;
 					tro.time = it->second;
 					++it;
+                    tro.trajectoryName = key;
 
 					tra.push_back(tro);
 
@@ -84,6 +80,7 @@ private:
 					++it;
 					tro.time = it->second;
 					++it;
+                    tro.trajectoryName = key;
 
 					tra.push_back(tro);
 
@@ -101,10 +98,12 @@ private:
 		for (const vector<TrajectoryObs<double, T>> &a : output){
 			cout << endl << "Trajectorie " << count << endl << endl;
 			count++;
-			/*for (const TrajectoryObs<double, T> &b : a){
+			
+			for (const TrajectoryObs<double, T> &b : a){
 				cout << b << endl;
-			}*/
+			}
 			cout << endl;
+			
 		}
 	}
 
@@ -151,31 +150,32 @@ public:
 
 	vector<Trajectory<double, T>> getData(){
 		insertTrajectory();
-		cout << "-------------------------------------------------" << endl;
 		cout << "Print data " << endl;
-		printTest();		
+		//cout << "Number of Trajectory: " << output.size() << endl;
+		printTest();
 		return output;
 	}
 
 	void write(vector<TrajectoryObs<double, T>>& middleCurve, double& epsilon, string& path){
 
 		ofstream filestreamOut;
+        filestreamOut.precision(15);
 		filestreamOut.exceptions(ios_base::failbit | ios_base::badbit);
 
 		try{
 			filestreamOut.open(path + "middleCurve.csv", ios_base::trunc);
 			if (T == 2){
-				filestreamOut << "\"" << "x" << "\"" << "," << "\"" << "y" << "\"" << "," << "\"" << "index" << "\"" << "\n";
+				filestreamOut << "\"" << "x" << "\"" << "," << "\"" << "y" << "\"" << "," << "\"" << "Name of the trajectory" << "\"" << "\n";
 				for (int i = 0; i < middleCurve.size(); i++){
 					TrajectoryObs<double, T> point = middleCurve[i];
-					filestreamOut << "\"" << point.pos[0] << "\"" << "," << "\"" << point.pos[1] << "\"" << "," << "\"" << "index-hier" << "\"" << "\n";
+					filestreamOut << "\"" << point.pos[0] << "\"" << "," << "\"" << point.pos[1] << "\"" << "," << "\"" << point.trajectoryName << "\"" << "\n";
 				}
 			}
 			else{//T == 3
 				filestreamOut << "\"" << "x" << "\"" << "," << "\"" << "y" << "\"" << "," << "\"" << "z" << "\"" << "," << "\"" << "index" << "\"" << "\n";
 				for (int i = 0; i < middleCurve.size(); i++){
 					TrajectoryObs<double, T> point = middleCurve[i];
-					filestreamOut << "\"" << point.pos[0] << "\"" << "," << "\"" << point.pos[1] << "\"" << "," << "\"" << point.pos[2] << "\"" << "," << "\"" << "index-hier" << "\"" << "\n";
+					filestreamOut << "\"" << point.pos[0] << "\"" << "," << "\"" << point.pos[1] << "\"" << "," << "\"" << point.pos[2] << "\"" << "," << "\"" << point.trajectoryName << "\"" << "\n";
 				}
 			}
 			filestreamOut << "\"" << "epsilon" << "\"" << "\n" << "\"" << epsilon << "\"";

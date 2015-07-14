@@ -81,7 +81,7 @@ protected:
 		FS_Point<T> * temp = find_cheapest_path(0);
 		vector<FS_Point<T>> path;
 
-		while (true){
+		/*while (true){
 			path.push_back(*temp);
 
 			if (!temp->get_has_next()){
@@ -89,7 +89,7 @@ protected:
 			}
 
 			temp = temp->get_next();
-		}
+		}*/
 
 		return  path;
 	}
