@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <bitset>
 #include <stdlib.h>
+#include <limits>
 
 #include "FS_Point.h"
 #include "trajectory.h"
@@ -78,34 +79,37 @@ protected:
 	}
 
 	vector<FS_Point<T>> find_path() {
-		FS_Point<T> * temp = find_cheapest_path(0);
+        find_cheapest_path(0);
+        FS_Point<T> temp = m_freespace[0];
 		vector<FS_Point<T>> path;
 
-		/*while (true){
-			path.push_back(*temp);
+		while (true){
+			path.push_back(temp);
+            
+           
 
-			if (!temp->get_has_next()){
+			if (!(temp.get_has_next())){
 				break;
 			}
-
-			temp = temp->get_next();
-		}*/
+ 
+			temp = m_freespace[temp.get_next()];
+		}
 
 		return  path;
 	}
 
-	FS_Point<T> * find_cheapest_path(int index) {
+	int find_cheapest_path(int index) {
 
 		if (index == m_freespace_size - 1) {
 			m_freespace[index].make_last();
 		}
 		else {
 			if (m_freespace[index].get_visited()) {
-				return &m_freespace[index];
+				return index;
 			}
 			else {
-				double cheapest = 100000.0;
-				FS_Point<T> * next = nullptr;
+				double cheapest = numeric_limits<float>::infinity();
+				int next = -1;
 				for (auto choice : m_choices) {
 
 					vector<int> next_coords = add_coords(index_to_coords(index), choice);
@@ -113,11 +117,11 @@ protected:
 					int next_index = coords_to_index(next_coords);
 
 					if (next_index > -1) {
-						FS_Point<T> * current = find_cheapest_path(next_index);
+						int current = find_cheapest_path(next_index);
 
-						if (current->get_cost() < cheapest) {
+						if (m_freespace[current].get_cost() < cheapest) {
 							next = current;
-							cheapest = current->get_cost();
+							cheapest = m_freespace[current].get_cost();
 						}
 					}
 				}
@@ -125,7 +129,7 @@ protected:
 			}
 		}
 
-		return &m_freespace[index];
+		return index;
 	}
 
 	int make_add_value(){
@@ -155,28 +159,31 @@ public:
 	 */
 	void printResults() {
 		vector<int> i;
+        		for(auto it : m_result){
+            
+            
 
-		for(auto it : m_result){
-
-			cout << "(";
-			vector<int> indi = it.get_indices();
-			for (int i = 0; i < indi.size(); i++){
-				cout << indi[i];
-				if (i != indi.size() - 1){
-					cout << ",";
-				}
-			}
-			cout << ") | CenterPoint: (";
+			       cout << "(";
+			       vector<int> indi = it.get_indices();
+                   for (int i = 0; i < indi.size(); i++){
+				        cout << indi[i];
+				          if (i != indi.size() - 1){
+					        cout << ",";
+                          }
+			       }
+			       cout << ") | CenterPoint: (";
 
 
-			for (int i = 0; i < (sizeof(it.get_center_point().pos) / sizeof(*it.get_center_point().pos)); i++){
-				cout << it.get_center_point().pos[i];
-				if (i != (sizeof(it.get_center_point().pos) / sizeof(*it.get_center_point().pos)) - 1){
-					cout << ",";
-				}
-			}
-			cout << ") | CenterDistance: " << it.get_center_distance() << endl;
+			       for (int i = 0; i < (sizeof(it.get_center_point().pos) / sizeof(*it.get_center_point().pos)); i++){
+				       cout << it.get_center_point().pos[i];
+				       if (i != (sizeof(it.get_center_point().pos) / sizeof(*it.get_center_point().pos)) - 1){
+				        	cout << ",";
+			  	       }
+			       }
+			       cout << ") | CenterDistance: " << it.get_center_distance() << endl;
+            
 		}
+        
 	}
 
 	/**

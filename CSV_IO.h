@@ -165,17 +165,17 @@ public:
 		try{
 			filestreamOut.open(path + "middleCurve.csv", ios_base::trunc);
 			if (T == 2){
-				filestreamOut << "\"" << "x" << "\"" << "," << "\"" << "y" << "\"" << "," << "\"" << "Name of the trajectory" << "\"" << "\n";
+				filestreamOut << "\"" << "x" << "\"" << "," << "\"" << "y" << "\"" << "," << "\"" << "Name of the trajectory" << "\"" << "," << "\"" << "Time" << "\""<< "\n";
 				for (int i = 0; i < middleCurve.size(); i++){
 					TrajectoryObs<double, T> point = middleCurve[i];
-					filestreamOut << "\"" << point.pos[0] << "\"" << "," << "\"" << point.pos[1] << "\"" << "," << "\"" << point.trajectoryName << "\"" << "\n";
+					filestreamOut << "\"" << point.pos[0] << "\"" << "," << "\"" << point.pos[1] << "\"" << "," << point.trajectoryName << "," << "\"" << point.time << "\"" << "\n";
 				}
 			}
 			else{//T == 3
 				filestreamOut << "\"" << "x" << "\"" << "," << "\"" << "y" << "\"" << "," << "\"" << "z" << "\"" << "," << "\"" << "index" << "\"" << "\n";
 				for (int i = 0; i < middleCurve.size(); i++){
 					TrajectoryObs<double, T> point = middleCurve[i];
-					filestreamOut << "\"" << point.pos[0] << "\"" << "," << "\"" << point.pos[1] << "\"" << "," << "\"" << point.pos[2] << "\"" << "," << "\"" << point.trajectoryName << "\"" << "\n";
+					filestreamOut << "\"" << point.pos[0] << "\"" << "," << "\"" << point.pos[1] << "\"" << "," << "\"" << point.pos[2] << "\"" << "," << point.trajectoryName <<  "," << "\"" << point.time << "\"" << "\n";
 				}
 			}
 			filestreamOut << "\"" << "epsilon" << "\"" << "\n" << "\"" << epsilon << "\"";

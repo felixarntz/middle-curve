@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+#include <limits>
 
 #include "trajectory.h"
 #include "base_point.h"
@@ -27,11 +28,11 @@ template<size_t T>
 class FS_Point :public base_point<T>{
 
 protected:
-	double m_center_distance = 1000000.0;
+	double m_center_distance = numeric_limits<float>::infinity();
 	TrajectoryObs<double, T> m_center_point;
 
-	double m_cost = 1000000.0;
-	FS_Point<T> * m_next;
+	double m_cost = numeric_limits<float>::infinity();
+	int m_next = -1;
 
 	bool m_has_next = false;
 	bool m_visited = false;
@@ -63,7 +64,7 @@ public:
 		return m_center_point;
 	}
 
-	void set_next(FS_Point<T> * next, double cost) {
+	void set_next(int next, double cost) {
 		if (m_center_distance + cost < m_cost) {
 			m_next = next;
 			m_cost = m_center_distance + cost;
@@ -76,7 +77,7 @@ public:
 		return m_cost;
 	}
 
-	FS_Point<T> * get_next() {
+	int get_next() {
 		return m_next;
 	}
 
@@ -91,7 +92,7 @@ public:
 
 	void make_last(){
 		m_cost = m_center_distance;
-		m_next = nullptr;
+		
 		m_visited = true;
 	}
 };
