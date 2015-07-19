@@ -54,6 +54,7 @@ protected:
 	}
 
 	virtual void fill_free_space() {
+    
 
 		for (int i = 0; i < m_freespace_size; i++) {
 			vector<int> coords = index_to_coords(i);
@@ -99,7 +100,6 @@ protected:
 	}
 
 	int find_cheapest_path(int index) {
-
 		if (index == m_freespace_size - 1) {
 			m_freespace[index].make_last();
 		}
@@ -108,7 +108,7 @@ protected:
 				return index;
 			}
 			else {
-				double cheapest = numeric_limits<float>::infinity();
+				double cheapest = numeric_limits<double>::infinity();
 				int next = -1;
 				for (auto choice : m_choices) {
 
@@ -118,7 +118,7 @@ protected:
 
 					if (next_index > -1) {
 						int current = find_cheapest_path(next_index);
-
+                
 						if (m_freespace[current].get_cost() < cheapest) {
 							next = current;
 							cheapest = m_freespace[current].get_cost();
@@ -151,7 +151,8 @@ public:
 		base_algorithm<T>::run();
 		m_choices = get_binary_choices(1, (int)pow(2, m_dimension), m_dimension);
 		fill_free_space();
-		m_result = find_path();
+        //cout << "Der Test: " << m_freespace[0].get_center_point() << endl;
+		//m_result = find_path();
 	}
 
 	/**

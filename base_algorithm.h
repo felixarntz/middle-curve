@@ -29,7 +29,7 @@ class base_algorithm{
 		vector<Trajectory<double, T>> m_trajectories;
 		int m_dimension = 0;
 		
-		int m_freespace_size = 0;
+		unsigned long m_freespace_size = 0;
 		vector<int> m_shape_strides;
 		
 		//Abstrakte Funktionen

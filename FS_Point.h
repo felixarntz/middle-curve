@@ -28,10 +28,10 @@ template<size_t T>
 class FS_Point :public base_point<T>{
 
 protected:
-	double m_center_distance = numeric_limits<float>::infinity();
+	double m_center_distance = numeric_limits<double>::infinity();
 	TrajectoryObs<double, T> m_center_point;
 
-	double m_cost = numeric_limits<float>::infinity();
+    double m_cost = numeric_limits<double>::infinity();
 	int m_next = -1;
 
 	bool m_has_next = false;

@@ -42,7 +42,6 @@ protected:
 			m_freespace.push_back(FS_Point<T>(coords));
 
 			for (int j = 0; j < m_dimension; j++) {
-
 				Trajectory<double, T> points = m_trajectories[j];
 				//TrajectoryObs<double, T> current_point = m_trajectories[j][coords[j]];
 
@@ -55,7 +54,9 @@ protected:
 							max_distance = temp_Distance;
 						}
 					}
+                    
 					m_freespace[i].set_center_point(points[k], max_distance);
+                    
 				}
 			}
 		}
