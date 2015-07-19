@@ -151,8 +151,7 @@ public:
 		base_algorithm<T>::run();
 		m_choices = get_binary_choices(1, (int)pow(2, m_dimension), m_dimension);
 		fill_free_space();
-        //cout << "Der Test: " << m_freespace[0].get_center_point() << endl;
-		//m_result = find_path();
+		m_result = find_path();
 	}
 
 	/**
