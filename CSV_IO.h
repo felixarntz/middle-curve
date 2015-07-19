@@ -143,6 +143,7 @@ public:
 
 		insertMap();
 		cout << "File read " << endl << endl;
+        speicher.erase(speicher.begin(), speicher.end());
 
 		return 1;
 
@@ -151,7 +152,7 @@ public:
 	vector<Trajectory<double, T>> getData(){
 		insertTrajectory();
 		cout << "Print data " << endl;
-		//cout << "Number of Trajectory: " << output.size() << endl;
+		cout << "Number of Trajectory: " << output[0].size() << endl;
 		printTest();
 		return output;
 	}
