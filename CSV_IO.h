@@ -7,8 +7,13 @@
 
 using namespace std;
 
+/*! \brief  File reader und writer zum Ein- und Auslesen der Trajectorien ueber csv datein
+*
+* File reader und writer zum Ein- und Auslesen der Trajectorien ueber csv datein
+*
+*/
+
 /**
-* Beschreibung: File reader zum einlesen der Trajectorien über csv datein
 *
 * Autoren: Felix Arntz, Marcel Stepien, Dennis Pawlowski
 *
@@ -110,6 +115,12 @@ private:
 
 public:
 
+	/**
+	* Liest eine .csv Datei mit Trajectorien ein
+	*
+	* str - der Pfad zu der Datei (inclusive datei)
+	* delim - das veeinbarte delimiter synbol der csv datei (Standart als ',' setzen)
+	*/
 	int read(const string& str, char& delim){
 
 		ifstream filestream(str);
@@ -149,6 +160,9 @@ public:
 
 	}
 
+	/**
+	* return - die eingelesenen Daten als Vector verpackt von Trajectories
+	*/
 	vector<Trajectory<double, T>> getData(){
 		insertTrajectory();
 		cout << "Print data " << endl;
@@ -157,6 +171,13 @@ public:
 		return output;
 	}
 
+	/**
+	* Schreibt eine .csv Datei mit Trajectorien aus
+	* 
+	* middleCurve - die erechnete Mittelkurve
+	* epsilon - der epsilonwert aus der Berechnung
+	* path - der Speicherpfad zu der Datei (exclusive datei)
+	*/
 	void write(vector<TrajectoryObs<double, T>>& middleCurve, double& epsilon, string& path){
 
 		ofstream filestreamOut;

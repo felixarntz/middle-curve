@@ -532,11 +532,9 @@ public:
 	}
 
 	/**
-	* Gibt das errechnete Ergebnis in der Konsole aus
+	* Gibt das Vollsteandige errechnete Ergebnis in der Konsole aus
 	*/
-	void printResults() {
-		vector<int> i;
-
+	void printResultsCompletly() {
 		for (auto it : m_result){
 			if (it.get_trajectory_index() != -1 && it.get_trajectoryObs_index() != -1){
 
@@ -557,7 +555,7 @@ public:
 
 				cout << ") | CenterPoint: (";
 
-				
+
 				for (int i = 0; i < obs_size; i++){
 					cout << obs.pos[i];
 					if (i != obs_size - 1){
@@ -568,6 +566,69 @@ public:
 			}
 
 		}
+	}
+
+	/**
+	* Gibt das errechnete Ergebnis in der Konsole aus
+	*/
+	void printResults() {
+		vector<int> def_coords;
+		for (int i = 0; i < T; i++){
+			def_coords.push_back(-1);
+		}
+
+		BS_Point<T> it = BS_Point<T>(def_coords);
+
+		m_result.push_back(BS_Point<T>(def_coords));
+
+		bool first = true;
+		for (auto obs : m_result){
+
+			if (!first){
+				if (it.get_trajectory_index() != -1 && it.get_trajectoryObs_index() != -1){
+
+					int tra_ind = it.get_trajectory_index();
+					int traObs_ind = it.get_trajectoryObs_index();
+
+					int obs_tra_ind = obs.get_trajectory_index();
+					int obs_traObs_ind = obs.get_trajectoryObs_index();
+
+					if (tra_ind != obs_tra_ind && traObs_ind != obs_traObs_ind){
+				
+						TrajectoryObs<double, T> r1 = m_trajectories[tra_ind][traObs_ind];
+						int r1_size = (sizeof(r1.pos) / sizeof(*r1.pos));
+
+						cout << "(";
+						vector<int> indi = it.get_indices();
+						for (int i = 0; i < indi.size(); i++){
+							cout << indi[i];
+							if (i != indi.size() - 1){
+								cout << ",";
+							}
+						}
+
+						cout << ") | CenterPoint: (";
+
+
+						for (int i = 0; i < r1_size; i++){
+							cout << r1.pos[i];
+							if (i != r1_size - 1){
+								cout << ",";
+							}
+						}
+						cout << ") | CenterDistance: " << it.get_mainvalue() << endl;
+					}
+				}
+			}
+
+			it = obs;
+
+			if (first){
+				first = false;
+			}
+			
+		}
+		m_result.pop_back();
 	}
 
 	/**
@@ -583,14 +644,43 @@ public:
 	vector<TrajectoryObs<double, T>> getMiddleCurve(){
 		vector<TrajectoryObs<double, T>> temp;
 
-		for (auto it : m_result){
-			if (it.get_trajectory_index() != -1 && it.get_trajectoryObs_index() != -1){
+		vector<int> def_coords;
+		for (int i = 0; i < T; i++){
+			def_coords.push_back(-1);
+		}
 
-				TrajectoryObs<double, T> obs = m_trajectories[it.get_trajectory_index()][it.get_trajectoryObs_index()];
-				temp.push_back(obs);
+		BS_Point<T> it = BS_Point<T>(def_coords);
+
+		m_result.push_back(BS_Point<T>(def_coords));
+
+		bool first = true;
+
+		for (auto obs : m_result){
+			if (!first){
+				if (it.get_trajectory_index() != -1 && it.get_trajectoryObs_index() != -1){
+					int tra_ind = it.get_trajectory_index();
+					int traObs_ind = it.get_trajectoryObs_index();
+
+					int obs_tra_ind = obs.get_trajectory_index();
+					int obs_traObs_ind = obs.get_trajectoryObs_index();
+
+					if (tra_ind != obs_tra_ind || traObs_ind != obs_traObs_ind){
+
+						TrajectoryObs<double, T> r1 = m_trajectories[tra_ind][traObs_ind];
+						temp.push_back(r1);
+					}
+				}
+				
+			}
+			it = obs;
+
+			if (first){
+				first = false;
 			}
 
 		}
+		m_result.pop_back();
+
 		return temp;
 	}
 

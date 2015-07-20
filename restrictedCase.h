@@ -397,10 +397,9 @@ public:
 	}
 
 	/**
-	* Gibt das errechnete Ergebnis in der Konsole aus
+	* Gibt das Vollsteandige errechnete Ergebnis in der Konsole aus
 	*/
-	void printResults() {
-		vector<int> i;
+	void printResultsCompletly() {
 
 		for (auto it : m_result){
 
@@ -439,6 +438,67 @@ public:
 	}
 
 	/**
+	* Gibt das errechnete Ergebnis in der Konsole aus
+	*/
+	void printResults() {
+		vector<int> def_coords;
+		for (int i = 0; i < T; i++){
+			def_coords.push_back(-1);
+		}
+
+		RS_Point<T> it = RS_Point<T>(def_coords);
+
+		m_result.push_back(RS_Point<T>(def_coords));
+
+		bool first = true;
+
+		for (auto obs : m_result){
+
+			if (!first){
+
+				cout << "(";
+				vector<int> indi = it.get_indices();
+				for (int i = 0; i < indi.size(); i++){
+					cout << indi[i];
+					if (i != indi.size() - 1){
+						cout << ",";
+					}
+				}
+				cout << ")";
+
+
+				if (it.get_tra() > -1 && it.get_traObs() > -1){
+
+					if (it.get_tra() != obs.get_tra() || it.get_traObs() != obs.get_traObs()){
+
+						TrajectoryObs<double, T> r1 = m_trajectories[it.get_tra()][it.get_traObs()];
+						int r1_size = (sizeof(r1.pos) / sizeof(*r1.pos));
+
+						cout << " | CenterPoint: (";
+
+
+						for (int i = 0; i < r1_size; i++){
+							cout << r1.pos[i];
+							if (i != r1_size - 1){
+								cout << ",";
+							}
+						}
+						cout << ")";
+					}
+				}
+				cout << endl;
+			}
+			it = obs;
+
+			if (first){
+				first = false;
+			}
+		}
+
+		m_result.pop_back();
+	}
+
+	/**
 	* return - das Ergebnis der Berechnung als vector<FS_Point<T>> Objekt (siehe FS_Point.h)
 	*/
 	vector<RS_Point<T>> getResult(){
@@ -451,17 +511,36 @@ public:
 	vector<TrajectoryObs<double, T>> getMiddleCurve(){
 		vector<TrajectoryObs<double, T>> temp;
 
-		for (auto it : m_result){
-			int tra = it.get_tra();
-			int traObs = it.get_traObs();
-
-			if (tra != -1 && traObs != -1){
-
-				TrajectoryObs<double, T> obs = m_trajectories[tra][traObs];
-				temp.push_back(obs);
-			}
-
+		vector<int> def_coords;
+		for (int i = 0; i < T; i++){
+			def_coords.push_back(-1);
 		}
+
+		RS_Point<T> it = RS_Point<T>(def_coords);
+
+		m_result.push_back(RS_Point<T>(def_coords));
+
+		bool first = true;
+
+		for (auto obs : m_result){
+
+			if (!first){
+				if (it.get_tra() != -1 && it.get_traObs() != -1){
+					if (it.get_tra() != obs.get_tra() || it.get_traObs() != obs.get_traObs()){
+
+						TrajectoryObs<double, T> r1 = m_trajectories[it.get_tra()][it.get_traObs()];
+						temp.push_back(r1);
+					}
+				}
+			}
+			it = obs;
+
+			if (first){
+				first = false;
+			}
+		}
+		m_result.pop_back();
+
 		return temp;
 	}
 

@@ -22,6 +22,15 @@ template<class T, size_t dim> struct TrajectoryObs {
 		os << " t=" << obs.time;
 		return os;
 	}
+
+	friend bool operator!= (const TrajectoryObs<T, dim>& obs1, const TrajectoryObs<T, dim>& obs2) {
+		for (int i = 0; i < (int)dim; i++){
+			if (obs1.pos[i] != obs2.pos[i]){
+				return true;
+			}
+		}
+		return false;
+	}
 };
 
 template<class T, size_t dim> using Trajectory = std::vector<TrajectoryObs<T, dim>>;

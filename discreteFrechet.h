@@ -155,34 +155,81 @@ public:
 	}
 
 	/**
+	* Gibt das Vollsteandige errechnete Ergebnis in der Konsole aus
+	*/
+	void printResultsCompletly() {
+		for (auto it : m_result){
+
+			cout << "(";
+			vector<int> indi = it.get_indices();
+			for (int i = 0; i < indi.size(); i++){
+				cout << indi[i];
+				if (i != indi.size() - 1){
+					cout << ",";
+				}
+			}
+			cout << ") | CenterPoint: (";
+
+
+			for (int i = 0; i < (sizeof(it.get_center_point().pos) / sizeof(*it.get_center_point().pos)); i++){
+				cout << it.get_center_point().pos[i];
+				if (i != (sizeof(it.get_center_point().pos) / sizeof(*it.get_center_point().pos)) - 1){
+					cout << ",";
+				}
+			}
+			cout << ") | CenterDistance: " << it.get_center_distance() << endl;
+
+		}
+
+	}
+
+	/**
 	 * Gibt das errechnete Ergebnis in der Konsole aus
 	 */
 	void printResults() {
-		vector<int> i;
-        		for(auto it : m_result){
-            
-            
-
-			       cout << "(";
-			       vector<int> indi = it.get_indices();
-                   for (int i = 0; i < indi.size(); i++){
-				        cout << indi[i];
-				          if (i != indi.size() - 1){
-					        cout << ",";
-                          }
-			       }
-			       cout << ") | CenterPoint: (";
-
-
-			       for (int i = 0; i < (sizeof(it.get_center_point().pos) / sizeof(*it.get_center_point().pos)); i++){
-				       cout << it.get_center_point().pos[i];
-				       if (i != (sizeof(it.get_center_point().pos) / sizeof(*it.get_center_point().pos)) - 1){
-				        	cout << ",";
-			  	       }
-			       }
-			       cout << ") | CenterDistance: " << it.get_center_distance() << endl;
-            
+		vector<int> def_coords;
+		for (int i = 0; i < T; i++){
+			def_coords.push_back(-1);
 		}
+
+		FS_Point<T> it = FS_Point<T>(def_coords);
+
+		m_result.push_back(FS_Point<T>(def_coords));
+
+		bool first = true;
+		for (auto obs : m_result){
+
+			if (!first){
+				if (it.get_center_point() != obs.get_center_point()){
+					cout << "(";
+					vector<int> indi = it.get_indices();
+					for (int i = 0; i < indi.size(); i++){
+						cout << indi[i];
+						if (i != indi.size() - 1){
+							cout << ",";
+						}
+					}
+					cout << ") | CenterPoint: (";
+
+
+					for (int i = 0; i < T; i++){
+						cout << it.get_center_point().pos[i];
+						if (i != T - 1){
+							cout << ",";
+						}
+					}
+					cout << ") | CenterDistance: " << it.get_center_distance() << endl;
+				}
+			}
+            
+			it = obs;
+
+			if (first){
+				first = false;
+			}
+		}
+
+		m_result.pop_back();
         
 	}
 
@@ -199,10 +246,32 @@ public:
 	vector<TrajectoryObs<double, T>> getMiddleCurve(){
 		vector<TrajectoryObs<double, T>> temp;
 
-		for (auto it : m_result){
-			TrajectoryObs<double, T> obs = it.get_center_point();
-			temp.push_back(obs);
+		vector<int> def_coords;
+		for (int i = 0; i < T; i++){
+			def_coords.push_back(-1);
 		}
+
+		FS_Point<T> it = FS_Point<T>(def_coords);
+
+		m_result.push_back(FS_Point<T>(def_coords));
+
+		bool first = true;
+
+		for (auto obs : m_result){
+			if (!first){
+				if (it.get_center_point() != obs.get_center_point()){
+					TrajectoryObs<double, T> obs = it.get_center_point();
+					temp.push_back(obs);
+				}
+			}
+
+			it = obs;
+
+			if (first){
+				first = false;
+			}
+		}
+		m_result.pop_back();
 
 		return temp;
 	}
