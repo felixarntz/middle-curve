@@ -129,7 +129,7 @@ public:
 
 		try{
 
-			if (!filestream.is_open()){ throw runtime_error("File not Found"); }
+			if (!filestream.is_open()){ throw runtime_error("File not found"); }
 			filestream.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); // Erste Zeile wird ignoriert
 
 			while (getline(filestream, stringPoint, '\n')){
@@ -178,7 +178,7 @@ public:
 	* epsilon - der epsilonwert aus der Berechnung
 	* path - der Speicherpfad zu der Datei (exclusive datei)
 	*/
-	void write(vector<TrajectoryObs<double, T>>& middleCurve, double& epsilon, string& path){
+	int write(vector<TrajectoryObs<double, T>>& middleCurve, double& epsilon, string& path){
 
 		ofstream filestreamOut;
         filestreamOut.precision(15);
@@ -202,9 +202,11 @@ public:
 			}
 			filestreamOut << "\"" << "epsilon" << "\"" << "\n" << "\"" << epsilon << "\"";
 			cout << endl << "File write " << endl << endl;
+            return 0;
 		}
 		catch (ios_base::failure& exc){
 			cout << endl << "ERROR: directory not found" << endl;
+            return 1;
 		}
 	}
 };

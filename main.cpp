@@ -1,5 +1,5 @@
 // Compile with "g++ -std=c++11 main.cpp"
-#pragma once
+
 
 #include <vector>
 #include <iostream>
@@ -11,39 +11,57 @@
 #include "restrictedCase.h"
 
 int main (int argc, char** argv) {
-
+    
+    /*Dies ist eine beispielhafte Ausführung
+     fuer eine erzeugung einer "middle Curve"*/
+    
+    
+    //delim -> Trennungssymbol der Daten in der CSV-Datei
 	char delim = ',';
+    
+    
+    /*Objekterzeugung fuer das einlesen der Daten aus einer CSV Datei
+     Wahlweise fuer 2 oder 3 dimensionale Trajektorien*/
 	CSV_IO<2> reader;
 	//CSV_IO<3> reader;
-	
-	//reader.read("\Bsp_1.csv", delim);
-	reader.read("\Bsp_2.csv", delim);
-	//reader.read("\Bsp_3.csv", delim);
-	//reader.read("\Bsp_3D.csv", delim);
-
-	//reader.read("C:\\input\\bg_UTM_1.csv", delim);
-	//reader.read("C:\\input\\bg_UTM_2.csv", delim);
+    
+    
+	/*Einlesen einer oder mehrerer Dateien*/
+	reader.read("<Pfad>\\datei_1.csv", delim);
+	reader.read("<Pfad>\\datei_2.csv", delim);
 
 
-	//DiscreteFrechet<2> un(reader.getData());
-	UnorderedCase<2> un(reader.getData());
+    
+    
+    /*Auswahl des Algorithmus fuer 2-dimensionale Trajektorien*/
+	DiscreteFrechet<2> un(reader.getData());
+	//UnorderedCase<2> un(reader.getData());
 	//OrderedCase<2> un(reader.getData());
 	//RestrictedCase<2> un(reader.getData());
-
-	//UnorderedCase<3> un(reader.getData());
-	//OrderedCase<3> un(reader.getData());
-	//RestrictedCase<3> un(reader.getData());
-
+    
+    
+    /*Auswahl des Algorithmus fuer 3-dimensionale Trajektorien*/
+    //DiscreteFrechet<3> un(reader.getData());
+    //UnorderedCase<3> un(reader.getData());
+    //OrderedCase<3> un(reader.getData());
+    //RestrictedCase<3> un(reader.getData());
+    
+    /*Der Algorithmus wird gestartet*/
 	un.run();
-	cout << "Pfad Vollstaendig" << endl;
-	un.printResultsCompletly();
-	cout << endl;
-	cout << "Pfad Ohne doppelte vorkommen" << endl;
+	
+    
+    /*Ergebnisse werden auf der Konsole ausgegeben*/
 	un.printResults();
 
-	string pfad = "C:\\output\\";
-	double epsilen = un.getEpsilon();
-	reader.write(un.getMiddleCurve(), epsilen, pfad);
+    /*Pfad -> Speicherot der Datei -> Dateiname lautet immer middleCurve.csv (bitte dies nicht in der Variable
+     pfad mitangeben)*/
+	string pfad = "C:\\<Pfad>\\";
+    
+	double epsilon = un.getEpsilon();
+    
+    /*middle curve wird ausgegeben und in eine CSV-Datei gespeichert*/
+    vector<TrajectoryObs<double, 2>> middle_curve = un.getMiddleCurve();
+	reader.write(middle_curve, epsilon, pfad);
 
 	return 0;
 }
