@@ -116,7 +116,8 @@ private:
 public:
 
 	/**
-	* Liest eine .csv Datei mit Trajectorien ein
+	* Liest eine .csv Datei mit Trajectorien ein. 
+	* Erkennt auch die Trajektorien wenn sie innerhalb der csv Datei durcheinder aufgelistet sind.
 	*
 	* str - der Pfad zu der Datei (inclusive datei)
 	* delim - das veeinbarte delimiter synbol der csv datei (Standart als ',' setzen)
@@ -161,6 +162,8 @@ public:
 	}
 
 	/**
+	* Die Trajectorien werden nach der Time aufsteigend Sortiert zurückgegeben.
+	*
 	* return - die eingelesenen Daten als Vector verpackt von Trajectories
 	*/
 	vector<Trajectory<double, T>> getData(){
