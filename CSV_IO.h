@@ -9,8 +9,6 @@ using namespace std;
 
 /*! \brief  File reader und writer zum Ein- und Auslesen der Trajectorien ueber csv datein
 *
-* File reader und writer zum Ein- und Auslesen der Trajectorien ueber csv datein
-*
 */
 
 /**
@@ -162,7 +160,7 @@ public:
 	}
 
 	/**
-	* Die Trajectorien werden nach der Time aufsteigend Sortiert zurückgegeben.
+	* Die Trajectorien werden nach der Time aufsteigend Sortiert zurueckgegeben.
 	*
 	* return - die eingelesenen Daten als Vector verpackt von Trajectories
 	*/
